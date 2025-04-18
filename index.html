@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+
+    <div id="loading-screen">
+        <img class="throbber" src="icon.png" />
+        <div class="text">Loading...</div>
+    </div>
+    <div id="error-screen" style="visibility: hidden;"></div>
+    <div id="login-screen">
+        <style>
+            a,
+            .whiteLink {
+                color: #ebebeb;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            #login-screen {
+                background: radial-gradient(rgba(24, 26, 33, 0) 0%, #181A21 100%) fixed no-repeat,
+                    url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top no-repeat,
+                    #181A21;
+                background-size: cover;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .login-container {
+                background-color: #181a21;
+                border-radius: 4px;
+                padding: 24px 32px;
+                width: 100%;
+                max-width: 400px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            .login-form {
+                display: grid;
+                gap: 16px;
+            }
+
+            .input-container {
+                display: flex;
+                flex-direction: column;
+                text-align: left;
+                gap: 4px;
+            }
+
+            .input-label {
+                font-size: 12px;
+                color: #afafaf;
+                text-transform: uppercase;
+                letter-spacing: 0.02em;
+                user-select: none;
+                margin: 4px 0
+            }
+
+            .input-label .user-id {
+                color: #1999ff;
+                font-weight: 500;
+            }
+
+            .input {
+                border-radius: 2px;
+                color: #fff;
+                padding: 10px;
+                background-color: #32353c;
+                outline: none;
+                font-size: 15px;
+                border: 1px solid #32353c;
+            }
+
+            .button-container {
+                display: flex;
+                justify-content: center;
+            }
+
+            .button-container button {
+                width: 100%;
+                max-width: 270px;
+                background: linear-gradient(90deg, #06bfff 0%, #2d73ff 100%);
+                border-radius: 2px;
+                border: none;
+                padding: 12px;
+                color: #fff;
+                font-size: 16px;
+                font-weight: 400;
+                cursor: pointer;
+            }
+
+            .login-help {
+                text-align: center;
+                color: #afafaf;
+                font-size: 12px;
+                text-decoration: underline;
+                cursor: pointer;
+            }
+        </style>
+
+        <div class="login-container">
+            <div class="login-container-inner">
+                <form class="login-form" id="login-form">
+                    <div class="input-container">
+                        <label for="accountId" class="input-label user-id">Sign in with user id</label>
+                        <input type="text" class="input" id="accountId">
+                    </div>
+                    <div class="input-container">
+                        <label for="apiKey" class="input-label">API Key</label>
+                        <input type="text" class="input" id="apiKey">
+                    </div>
+                    <div>
+                        <input type="checkbox" class="input" id="rememberMe">
+                        <label for="rememberMe" class="input-label">Remember me</label>
+                    </div>
+                    <div class="button-container"><button class="login" id="login" type="submit">Sign in</button></div>
+                    <a class="login-help" target="_blank" href="HELP.md">Help, I can't sign in</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="size-selector">
+        <label for="size-options">Select Tile Size:</label>
+        <select id="size-options">
+            <option value="default">Default</option>
+            <option value="small">Small</option>
+            <option value="smaller">Smaller</option>
+            <option value="smallest">Smallest</option>
+            <option value="umm">UMM</option>
+            <option value="wtf">WTF</option>
+        </select>
+
+        <label for="sort-options">Select Sorting Type:</label>
+        <select id="sort-options">
+            <option value="playtime">Sort by Playtime</option>
+            <option value="name">Sort by Name</option>
+            <option value="recent">Sort by Recently Played</option>
+        </select>
+    </div>
+    <div id="game-container"></div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
