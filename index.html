@@ -6,135 +6,76 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta name="description" content="View all your Steam games from your computer desktop!">
+    <meta name="author" content="CentricGamer834">
+    <meta name="keywords"
+        content="steam, games, desktop, app, gaming, library, call, of, diddy, black, ops, warzone, mw2, mw3, cod, csgo, counter, strike, global, offensive, valorant, overwatch">
+
+    <meta property="og:title" content="SteamDesktop">
+    <meta property="og:description" content="View all your Steam games from your computer desktop!">
+    <meta property="og:image" content="icon.png">
+    <meta property="og:url" content="https://centricgamer834.github.io/SteamDesktop/">
+
+    <meta name="twitter:title" content="SteamDesktop">
+    <meta name="twitter:description" content="View all your Steam games from your computer desktop!">
+    <meta name="twitter:card" content="icon.png">
+    <meta name="twitter:image" content="icon.png">
+
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="css/main.css">
+
+    <title>SteamDesktop</title>
 </head>
 
 <body>
-
     <div id="loading-screen">
         <img class="throbber" src="icon.png" />
         <div class="text">Loading...</div>
     </div>
     <div id="error-screen" style="visibility: hidden;"></div>
     <div id="login-screen">
-        <style>
-            a,
-            .whiteLink {
-                color: #ebebeb;
-                text-decoration: none;
-                cursor: pointer;
-            }
-
-            #login-screen {
-                background: radial-gradient(rgba(24, 26, 33, 0) 0%, #181A21 100%) fixed no-repeat,
-                    url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top no-repeat,
-                    #181A21;
-                background-size: cover;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .login-container {
-                background-color: #181a21;
-                border-radius: 4px;
-                padding: 24px 32px;
-                width: 100%;
-                max-width: 400px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            }
-
-            .login-form {
-                display: grid;
-                gap: 16px;
-            }
-
-            .input-container {
-                display: flex;
-                flex-direction: column;
-                text-align: left;
-                gap: 4px;
-            }
-
-            .input-label {
-                font-size: 12px;
-                color: #afafaf;
-                text-transform: uppercase;
-                letter-spacing: 0.02em;
-                user-select: none;
-                margin: 4px 0
-            }
-
-            .input-label .user-id {
-                color: #1999ff;
-                font-weight: 500;
-            }
-
-            .input {
-                border-radius: 2px;
-                color: #fff;
-                padding: 10px;
-                background-color: #32353c;
-                outline: none;
-                font-size: 15px;
-                border: 1px solid #32353c;
-            }
-
-            .button-container {
-                display: flex;
-                justify-content: center;
-            }
-
-            .button-container button {
-                width: 100%;
-                max-width: 270px;
-                background: linear-gradient(90deg, #06bfff 0%, #2d73ff 100%);
-                border-radius: 2px;
-                border: none;
-                padding: 12px;
-                color: #fff;
-                font-size: 16px;
-                font-weight: 400;
-                cursor: pointer;
-            }
-
-            .login-help {
-                text-align: center;
-                color: #afafaf;
-                font-size: 12px;
-                text-decoration: underline;
-                cursor: pointer;
-            }
-        </style>
-
-        <div class="login-container">
-            <div class="login-container-inner">
-                <form class="login-form" id="login-form">
-                    <div class="input-container">
-                        <label for="accountId" class="input-label user-id">Sign in with user id</label>
-                        <input type="text" class="input" id="accountId">
-                    </div>
-                    <div class="input-container">
-                        <label for="apiKey" class="input-label">API Key</label>
-                        <input type="text" class="input" id="apiKey">
-                    </div>
-                    <div>
-                        <input type="checkbox" class="input" id="rememberMe">
-                        <label for="rememberMe" class="input-label">Remember me</label>
-                    </div>
-                    <div class="button-container"><button class="login" id="login" type="submit">Sign in</button></div>
-                    <a class="login-help" target="_blank" href="HELP.md">Help, I can't sign in</a>
-                </form>
+        <form class="login-centered-modal" id="login-form">
+            <div class="input-wrapper">
+                <label for="accountId" class="input-label user-id">Sign in with user id</label>
+                <input type="text" class="input" id="accountId">
             </div>
-        </div>
+            <div class="input-wrapper">
+                <label for="apiKey" class="input-label">API Key</label>
+                <input type="text" class="input" id="apiKey">
+            </div>
+            <div class="input-wrapper row">
+                <input type="checkbox" class="input" id="rememberMe">
+                <label for="rememberMe" class="input-label">Remember me</label>
+            </div>
+            <div class="button-container"><button class="login" id="login" type="submit">Sign in</button>
+                <a class="mute-link" target="_blank"
+                    href="https://google.com/search?q=where+to+find+steam+api+key+and+my+user+account+id">Help, I
+                    can't sign in</a>
+            </div>
+        </form>
     </div>
 
     <div id="size-selector">
+        <div class="select-wrapper">
+            <label for="selectButton" class="select-label">Sort By</label>
+            <button id="selectButton" class="select-button">
+                <div class="select-button-text">Alphabetical</div>
+                <div class="select-button-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="SVGIcon_Button SVGIcon_DownArrowContextMenu"
+                        data-name="Layer 1" viewBox="0 0 128 128" x="0px" y="0px">
+                        <polygon points="50 59.49 13.21 22.89 4.74 31.39 50 76.41 95.26 31.39 86.79 22.89 50 59.49">
+                        </polygon>
+                    </svg>
+                </div>
+            </button>
+
+
+            <!-- <select style="display: none;" id="selectOptions" class="select-options">
+                <option value="playtime">Playtime</option>
+                <option value="name">Name</option>
+                <option value="recent">Recently Played</option>
+            </select> -->
+        </div>
         <label for="size-options">Select Tile Size:</label>
         <select id="size-options">
             <option value="default">Default</option>

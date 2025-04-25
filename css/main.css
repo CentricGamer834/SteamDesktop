@@ -25,6 +25,103 @@ a {
     font-weight: 550
 }
 
+.white-link {
+    color: #ebebeb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.mute-link {
+    text-align: center;
+    color: #afafaf;
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
+/* #region Login Styles */
+#login-screen {
+    background: radial-gradient(rgba(24, 26, 33, 0) 0%, #181A21 100%) fixed no-repeat,
+        url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top no-repeat,
+        #181A21;
+    background-size: cover;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-centered-modal {
+    background-color: #181a21;
+    border-radius: 3px;
+    padding: 22px 30px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    display: grid;
+    gap: 16px;
+}
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 4px;
+}
+
+.input-wrapper.row {
+    flex-direction: row;
+    text-align: center;
+    justify-content: center;
+}
+
+.input-wrapper .input-label {
+    font-size: 12px;
+    color: #afafaf;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    user-select: none;
+    margin: 4px 0
+}
+
+.input-wrapper .input {
+    border-radius: 2px;
+    color: #fff;
+    padding: 10px;
+    background-color: #32353c;
+    outline: none;
+    font-size: 15px;
+    border: 1px solid #32353c;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.button-container button {
+    width: 100%;
+    max-width: 270px;
+    background: linear-gradient(90deg, #06bfff 0%, #2d73ff 100%);
+    border-radius: 2px;
+    border: none;
+    padding: 12px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+}
+/* #endregion Login Styles */
+
+
+/* #region Game Container Styles */
 #game-container {
     width: 100%;
     height: 100%;
@@ -356,17 +453,17 @@ a {
 
 .badge.rank-1 {
     background: linear-gradient(to right, gold, #fc0);
-    color: #000
+    color: #fff
 }
 
 .badge.rank-2 {
     background: linear-gradient(to right, silver, #a9a9a9);
-    color: #000
+    color: #fff
 }
 
 .badge.rank-3 {
     background: linear-gradient(to right, #cd7f32, #b87333);
-    color: #fff
+    color: #fff;
 }
 
 #error-screen,

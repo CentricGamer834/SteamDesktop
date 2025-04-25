@@ -1,7 +1,5 @@
-// Replace with your own Steam User ID
 // https://steamid.io/lookup
 let STEAM_USER_ID = "";
-// This key is stolen from the internet, please replace it with your own key
 // https://steamcommunity.com/dev/apikey
 let STEAM_API_KEY = "";
 // Proxy URL for CORS issues
@@ -15,11 +13,9 @@ const errorScreen = document.getElementById("error-screen");
 const sizeSelector = document.getElementById("size-options");
 const sortSelector = document.getElementById("sort-options");
 
-
 // UI Helpers
 const showLoading = () => loadingScreen.style.visibility = "visible";
 const hideLoading = () => loadingScreen.style.visibility = "hidden";
-
 const showError = msg => {
     errorScreen.innerHTML = `<img src="./icon.png"><p>${msg}</p><a href="javascript:location.reload()">Reload</a>`;
     errorScreen.style.visibility = "visible";
@@ -44,7 +40,7 @@ const getAppDetails = async (appId) => {
     return data?.[appId]?.data || {};
 };
 
-const createAttachedPopout = (parent, child, attached) => {
+const createAttachedPopout = (parent, child) => {
     const targetRect = parent.getBoundingClientRect();
     const childRect = child.getBoundingClientRect();
     const { scrollX, scrollY } = window;
@@ -76,16 +72,6 @@ const createGamePopout = (parent, details, index) => {
     // Remove any existing popouts
     document.querySelectorAll(".popout").forEach(_popout => _popout.remove());
 
-    const formatGameStats = () => {
-        const lastPlayed = parseInt(rtime_last_played);
-        return {
-            recentMinutes: playtime_2weeks || 0,
-            totalHours: (playtime_forever / 60).toFixed(1),
-            totalMinutes: parseInt(playtime_forever),
-            lastPlayedText: lastPlayed ? new Date(lastPlayed * 1000).toLocaleDateString() : "Never"
-        };
-    };
-
     const handleMouseEnter = () => {
         clearTimeout(popoutTimeout);
         clearTimeout(hideTimeout);
@@ -93,7 +79,13 @@ const createGamePopout = (parent, details, index) => {
         popoutTimeout = setTimeout(async () => {
             if (!parent.matches(":hover")) return;
 
-            const { recentMinutes, totalHours, totalMinutes, lastPlayedText } = formatGameStats();
+            const lastPlayed = parseInt(rtime_last_played);
+
+            const recentMinutes = playtime_2weeks || 0,
+                totalHours = (playtime_forever / 60).toFixed(1),
+                totalMinutes = parseInt(playtime_forever),
+                lastPlayedText = lastPlayed ? new Date(lastPlayed * 1000).toLocaleDateString() : "Never"
+
             const { screenshots, header_image } = await getAppDetails(appid);
 
             currentPopout = document.createElement("div");
