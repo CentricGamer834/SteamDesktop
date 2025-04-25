@@ -14,7 +14,8 @@ html {
     background-color: var(--color-background);
     color: var(--color-text);
     user-select: none;
-    overflow: hidden
+    overflow: hidden;
+    padding-bottom: 20%;
 }
 
 a {
