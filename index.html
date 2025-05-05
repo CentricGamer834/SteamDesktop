@@ -36,11 +36,13 @@
         <form class="login-centered-modal" id="login-form">
             <div class="input-wrapper">
                 <label for="accountId" class="input-label user-id">Sign in with user id</label>
-                <input type="text" class="input" id="accountId">
+                <input type="text" class="input" id="accountId" required minlength="16" maxlength="18"
+                    placeholder="Enter your Steam user id here">
             </div>
             <div class="input-wrapper">
                 <label for="apiKey" class="input-label">API Key</label>
-                <input type="text" class="input" id="apiKey">
+                <input type="text" class="input" id="apiKey" required minlength="30" maxlength="34"
+                    placeholder="Enter your Steam API key here">
             </div>
             <div class="input-wrapper row">
                 <input type="checkbox" class="input" id="rememberMe">
