@@ -19,7 +19,7 @@ const showLoginTimeout = () => {
 };
 
 const showError = (msg) => {
-	errorScreen.innerHTML = `<img src="/img/icon.png"><p>${msg}</p><a href="javascript:location.reload()">Reload</a>`;
+	errorScreen.innerHTML = `<img src="../img/icon.png"><p>${msg}</p><a href="javascript:location.reload()">Reload</a>`;
 	errorScreen.removeAttribute("hidden");
 	hideLoading();
 };
@@ -194,7 +194,7 @@ const createGameCard = (game, index, topAppIds) => {
 		const fallback = document.createElement("div");
 		fallback.className = "alt-text-elm";
 		fallback.innerText = name;
-		coverImg.src = "/img/defaultappimage.png";
+		coverImg.src = "../img/defaultappimage.png";
 		card.appendChild(fallback);
 	};
 
