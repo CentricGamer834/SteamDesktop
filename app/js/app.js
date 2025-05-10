@@ -19,7 +19,7 @@ const showLoginTimeout = () => {
 };
 
 const showError = (msg) => {
-	errorScreen.innerHTML = `<img src="./icon.png"><p>${msg}</p><a href="javascript:location.reload()">Reload</a>`;
+	errorScreen.innerHTML = `<img src="/img/icon.png"><p>${msg}</p><a href="javascript:location.reload()">Reload</a>`;
 	errorScreen.removeAttribute("hidden");
 	hideLoading();
 };
