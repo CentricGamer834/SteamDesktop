@@ -1,0 +1,135 @@
+html,
+body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	color: #e0e0e0;
+	font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
+	background: #1b2838 url(/img/cluster_bg.png) no-repeat bottom center;
+	user-select: none;
+	box-sizing: border-box;
+}
+
+a {
+    display: block;
+    width: fit-content;
+    color: #181A21;
+    font-family: "Motiva Sans", Sans-serif;
+    cursor: pointer;
+    font-weight: 550;
+    color: #ebebeb;
+    font-size: 12px;
+    text-align: center;
+    color: #afafaf;
+}
+
+
+
+.login-screen {
+    background: radial-gradient(rgba(24, 26, 33, 0) 0%, #181A21 100%) fixed no-repeat,
+        url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top no-repeat,
+        #1b2838;
+    background-size: cover;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #eae8e8;
+    z-index: 99999;
+    inset: 0;
+}
+
+#login-form {
+    background-color: #181a21;
+    border-radius: 8px;
+    padding: 22px 30px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    display: grid;
+    gap: 16px;
+}
+
+#login-form.login-error .cred-input {
+    border-color: #c15755;
+}
+
+#login-form.login-error #error-display {
+    color: #c15755;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 4px;
+}
+
+.input-wrapper.row {
+    flex-direction: row;
+    text-align: center;
+    justify-content: center;
+}
+
+.input-wrapper .input-label {
+    font-size: 12px;
+    color: #afafaf;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    user-select: none;
+    margin: 4px 0
+}
+
+.input-wrapper .cred-input {
+    border-radius: 2px;
+    color: #fff;
+    padding: 10px;
+    background-color: #32353c;
+    outline: none;
+    font-size: 15px;
+    border: 1px solid #32353c;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.button-container [type=submit]#submit {
+    width: 100%;
+    max-width: 270px;
+    background: linear-gradient(90deg, #06bfff 0%, #2d73ff 100%);
+    border-radius: 2px;
+    border: none;
+    padding: 12px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.button-container [type=submit]#submit[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    #login-centered-form {
+        padding: 16px;
+        max-width: 90vw;
+    }
+
+    .button-container button {
+        font-size: 15px;
+        padding: 10px;
+    }
+}

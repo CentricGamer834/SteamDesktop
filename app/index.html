@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>SteamDesktop</title>
+
+    <meta name="robots" content="index,follow">
+    <meta name="description" content="View all your Steam games from your computer desktop!">
+    <meta name="author" content="CentricGamer834">
+    <meta name="keywords"
+        content="steam, games, desktop, app, gaming, library, call, of, diddy, black, ops, warzone, mw2, mw3, cod, csgo, counter, strike, global, offensive, valorant, overwatch">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SteamDesktop">
+    <meta property="og:description" content="View all your Steam games from your computer desktop!">
+    <meta property="og:image" content="icon.png">
+    <meta property="og:url" content="https://centricgamer834.github.io/SteamDesktop/">
+
+    <!-- Twitter -->
+    <meta name="twitter:title" content="SteamDesktop">
+    <meta name="twitter:description" content="View all your Steam games from your computer desktop!">
+    <meta name="twitter:card" content="icon.png">
+    <meta name="twitter:image" content="icon.png">
+
+    <link rel="preconnect" href="https://corsproxy.io" crossorigin />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/app/css/app.css">
+</head>
+
+<body>
+    <div id="header">
+        <a href="javascript:(localStorage.clear(), window.location.reload(), void(0))" onclick="localStorage.clear();window.location.reload();">Logout</a>
+        <div id="size-selector">
+            <label for="size-options">Select Tile Size:</label>
+            <select id="size-options">
+                <option value="default">Default</option>
+                <option value="huge">Huge</option>
+                <option value="small">Small</option>
+                <option value="smaller">Smaller</option>
+                <option value="smallest">Smallest</option>
+                <option value="tiny">Tiny</option>
+            </select>
+
+            <label for="sort-options">Select Sorting Type:</label>
+            <select id="sort-options">
+                <option value="playtime">Sort by Playtime</option>
+                <option value="name">Sort by Name</option>
+                <option value="recent">Sort by Recently Played</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="error-screen" class="cover-screen" hidden></div>
+
+    <div id="loading-screen" class="cover-screen">
+        <img src="icon.png" alt="SteamDesktop Icon">
+        <p>Loading...</p>
+    </div>
+
+    <main id="game-container"></main>
+
+    <script src="../app/js/app.js"></script>
+</body>
+
+</html>
