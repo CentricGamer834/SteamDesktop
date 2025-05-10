@@ -15,7 +15,7 @@ const showLoading = () => loadingScreen.removeAttribute("hidden");
 const hideLoading = () => loadingScreen.setAttribute("hidden", "true");
 const showLoginTimeout = () => {
 	showError("Session expired or something went wrong. Please log in again. <br/> Redirecting to login page in 5 seconds...");
-	setTimeout(() => location.href = "/login", 5000);
+	setTimeout(() => location.href = "https://centricgamer834.github.io/SteamDesktop/login", 5000);
 };
 
 const showError = (msg) => {

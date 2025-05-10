@@ -81,7 +81,7 @@
 				: localStorage.clear();
 
 			// Redirect to application
-			location.href = "/app";
+			location.href = "https://centricgamer834.github.io/SteamDesktop/app";
 		} catch (err) {
 			console.error("Login failed:", err);
 			showErrorMessage(`Network or Steam API error. Details: ${err.message}`);
