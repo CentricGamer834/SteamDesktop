@@ -20,6 +20,10 @@ a {
     font-size: 12px;
     color: #afafaf;
 }
+
+[hidden] {
+    display: none !important;
+}
 /** Custom Scrollbar **/
 
 ::-webkit-scrollbar {
@@ -80,10 +84,6 @@ a {
     visibility: visible;
 }
 
-/** Smooth fade */
-.overlay-screen[hidden] {
-    visibility: hidden !important;
-}
 
 .overlay-screen img {
     -webkit-user-drag: none;
@@ -103,11 +103,20 @@ a {
 .app-container {
     color: #d3d3d3;
     height: 100%;
-    overflow: hidden scroll;
+    display: flex;
+    flex-direction: column;
 }
 
-label {
-    color: #a0a1a5;
+.controls-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ddd;
+    padding: 0.5rem 1.5rem;
+    border-bottom: 1px solid #fff;
+    height: 4rem;
+    flex: 0 0 auto;
+    overflow: auto;
 }
 
 /** Game Cards */
@@ -116,11 +125,12 @@ label {
     width: 100%;
     height: 100%;
     grid-auto-flow: row;
-    justify-content: space-between;
+    justify-content: space-around;
+    overflow-y: auto;
     padding: 0.5rem;
-    /**default grid layout */
     grid-template-columns: repeat(auto-fill, 222px);
     grid-auto-rows: 333px;
+    align-items: center;
     gap: 24px 16px;
 }
 
@@ -139,8 +149,6 @@ label {
     margin: 0;
     filter: brightness(1) contrast(1);
     cursor: pointer;
-    border-top: 1px solid rgba(201, 201, 201, 0.06);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
     transform-origin: 50% 50%;
     transform-style: preserve-3d;
@@ -386,7 +394,9 @@ label {
     flex-direction: row;
 }
 
-.label {
+/**todo*/
+.label,
+label {
     font-weight: 500;
     text-transform: uppercase;
     color: #7a8b9d;
@@ -424,16 +434,6 @@ label {
 
 
 
-/** TODO REVISE THIS **/
-.user-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    padding: 6px 24px;
-    color: #ddd;
-}
-
 .user-info {
     display: flex;
     align-items: center;
@@ -470,11 +470,21 @@ label {
     font-size: 0.9rem;
     cursor: pointer;
     border-radius: 4px;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .button:hover {
     background-color: #444;
     border-color: #888;
     color: #fff;
+}
+
+.button.danger {
+    background-color: #c15755;
+    border-color: #ce403e;
+}
+
+.button.danger:hover {
+    background-color: #ce403e;
+    border-color: #c15755;
 }

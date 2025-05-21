@@ -89,7 +89,7 @@ async function fetchUserDetails() {
 	}
 }
 
-function attachPopoutToParent(parent, popout) {
+function attachFloaterToParent(parent, popout) {
 	const { scrollX, scrollY } = window;
 	const rect = parent.getBoundingClientRect();
 	const pRect = popout.getBoundingClientRect();
@@ -106,6 +106,103 @@ function attachPopoutToParent(parent, popout) {
 	popout.style.left = `${Math.max(scrollX, left)}px`;
 	popout.style.top = `${Math.max(scrollY, top)}px`;
 	return popout;
+}
+
+function setupGameMenuTrigger(card, game) {
+	const menuBackdrop = document.createElement("div");
+	menuBackdrop.style.position = "fixed";
+	menuBackdrop.style.top = "0";
+	menuBackdrop.style.left = "0";
+	menuBackdrop.style.width = "100%";
+	menuBackdrop.style.height = "100%";
+	menuBackdrop.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+	menuBackdrop.style.zIndex = 9999;
+
+	const menu = document.createElement("div");
+	menu.style.position = "absolute";
+	menu.style.zIndex = 10000;
+	menu.style.background = "#222";
+	menu.style.border = "1px solid #444";
+	menu.style.borderRadius = "4px";
+	menu.style.padding = "4px 0";
+	menu.style.minWidth = "180px";
+	menu.style.color = "#eee";
+	menu.style.fontSize = "14px";
+	menu.style.userSelect = "none";
+
+	const links = [
+		{ label: "Play", url: `steam://rungameid/${game.appid}` },
+		{ label: "View on Steam", url: `https://store.steampowered.com/app/${game.appid}` },
+		{ label: "View News", url: `https://store.steampowered.com/app/${game.appid}/news/` },
+		{ label: "View Screenshots", url: `https://store.steampowered.com/app/${game.appid}/screenshots/` },
+		{ label: "View Videos", url: `https://store.steampowered.com/app/${game.appid}/videos/` },
+	];
+
+	links.forEach(({ label, url }) => {
+		const item = document.createElement("div");
+		item.className = "menu-item";
+		item.textContent = label;
+		item.style.padding = "6px 16px";
+		item.style.cursor = "pointer";
+		item.style.whiteSpace = "nowrap";
+
+		item.addEventListener("mouseenter", () => {
+			item.style.backgroundColor = "#444";
+		});
+
+		item.addEventListener("mouseleave", () => {
+			item.style.backgroundColor = "transparent";
+		});
+
+		item.addEventListener("click", () => {
+			window.open(url, "_blank");
+			hideMenu();
+		});
+
+		menu.appendChild(item);
+	});
+
+	function showMenu(x, y) {
+		menu.style.left = `${x}px`;
+		menu.style.top = `${y}px`;
+		menu.style.display = "block";
+
+		const rect = menu.getBoundingClientRect();
+		if (rect.right > window.innerWidth) {
+			menu.style.left = `${window.innerWidth - rect.width - 10}px`;
+		}
+
+		if (rect.bottom > window.innerHeight) {
+			menu.style.top = `${window.innerHeight - rect.height - 10}px`;
+		}
+
+		document.body.appendChild(menuBackdrop);
+		document.body.appendChild(menu);
+	}
+
+	const hideMenu = () => {
+		menu.remove();
+		menuBackdrop.remove();
+	};
+
+	card.addEventListener("contextmenu", (e) => {
+		e.preventDefault();
+		showMenu(e.pageX, e.pageY);
+	});
+
+	document.addEventListener("click", (e) => {
+		if (!menu.contains(e.target)) {
+			hideMenu();
+		}
+	});
+
+	menuBackdrop.addEventListener("click", () => {
+		hideMenu();
+	});
+	window.addEventListener("scroll", hideMenu);
+	window.addEventListener("resize", hideMenu);
+	window.addEventListener("mouseleave", hideMenu);
+	window.addEventListener("blur", hideMenu);
 }
 
 function setupGamePopoutTrigger(card, game, rankIndex) {
@@ -165,7 +262,7 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
     </div>
 </div>`;
 			document.body.appendChild(popout);
-			attachPopoutToParent(card, popout);
+			attachFloaterToParent(card, popout);
 			popout.classList.add("show");
 			if (screenshots?.length) startCarousel(screenshots);
 		} catch (err) {
@@ -183,7 +280,6 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 		clearTimeout(delayIn);
 		delayOut = setTimeout(clear, 200);
 
-
 		window.removeEventListener("contextmenu", scheduleRemove);
 		window.removeEventListener("mouseleave", scheduleRemove);
 		window.removeEventListener("blur", scheduleRemove);
@@ -200,13 +296,12 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 	});
 }
 
-
 function createGameCard(game, index, rankedIds) {
 	const card = document.createElement("section");
 	card.role = "link";
 	card.className = "game-card";
 	card.onclick = () => {
-		// Check
+		// Todo
 		if (redirectToSite.checked) {
 			window.open(`https://store.steampowered.com/app/${game.appid}`, "_blank");
 		} else {
@@ -217,12 +312,9 @@ function createGameCard(game, index, rankedIds) {
 	const shard = document.createElement("div");
 	shard.className = "panel-shard";
 
-	const imgContainer = document.createElement("div");
-	imgContainer.className = "image-container";
-
-	const img = new Image();
-	img.className = "cover-image";
-	img.alt = game.name || "Game Cover";
+	const coverImg = new Image();
+	coverImg.className = "cover-image";
+	coverImg.alt = game.name || "Game Cover";
 
 	const fallbackImages = [
 		`https://steamcdn-a.akamaihd.net/steam/apps/${game.appid}/library_600x900_2x.jpg`,
@@ -232,20 +324,19 @@ function createGameCard(game, index, rankedIds) {
 	];
 
 	let fallbackIndex = 0;
-	img.onerror = () => {
+	coverImg.onerror = () => {
 		if (fallbackIndex < fallbackImages.length - 1) {
-			img.src = fallbackImages[++fallbackIndex];
+			coverImg.src = fallbackImages[++fallbackIndex];
 		} else {
-			img.style.display = "none";
+			coverImg.style.display = "none";
 			const fallbackText = document.createElement('div');
 			fallbackText.className = "fallback-text";
 			fallbackText.textContent = game.name || "Unknown Game";
-			imgContainer.appendChild(fallbackText);
+			card.appendChild(fallbackText);
 		}
 	};
 
-	img.src = fallbackImages[0];
-	imgContainer.appendChild(img);
+	coverImg.src = fallbackImages[0];
 
 	if (rankedIds.includes(game.appid)) {
 		const rank = rankedIds.indexOf(game.appid) + 1;
@@ -255,8 +346,9 @@ function createGameCard(game, index, rankedIds) {
 		card.appendChild(badge);
 	}
 
-	card.append(imgContainer, shard);
+	card.append(coverImg, shard);
 	setupGamePopoutTrigger(card, game, index);
+	setupGameMenuTrigger(card, game);
 
 	return card;
 }
@@ -322,5 +414,8 @@ async function loadAndRender() {
 }
 
 logoutBtn.onclick = () => clearSessionAndRedirect("Logging out...", "login.html", 500);
+openSettingsBtn.onclick = () => {
+	settingsModal.removeAttribute("hidden");
+}
 
 loadAndRender();
