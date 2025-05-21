@@ -1,4 +1,5 @@
 // Development
+// TODO: proxy stuff
 const PROXY_URL = "https://corsproxy.io/?";
 const steamUserId = localStorage.getItem("steamId") || "";
 const steamApiKey = localStorage.getItem("apiKey") || "";
@@ -14,7 +15,7 @@ const openSettingsBtn = document.getElementById("settings-button");
 const showLoading = () => loadingScreen.removeAttribute("hidden");
 const hideLoading = () => loadingScreen.setAttribute("hidden", "true");
 const displayError = (msg, isFatal = true) => {
-    errorScreen.innerHTML = `
+	errorScreen.innerHTML = `
 <img src="img/icon_478x478.png" alt="Error Icon" />
 <p>${msg}</p>
 <div class="error-actions">
@@ -23,15 +24,15 @@ const displayError = (msg, isFatal = true) => {
 </div>
     `;
 
-    errorScreen.removeAttribute("hidden");
-    hideLoading();
+	errorScreen.removeAttribute("hidden");
+	hideLoading();
 };
 
 const clearSessionAndRedirect = (msg, redirect = "login.html", delay = 3000) => {
-    localStorage.removeItem('steamId');
-    localStorage.removeItem('apiKey');
-    displayError(`An Error occured, please try to login again <br/> ${msg} <br/> Redirecting in ${delay / 1000} seconds...`, true);
-    setTimeout(() => window.location.replace(redirect), delay);
+	localStorage.removeItem('steamId');
+	localStorage.removeItem('apiKey');
+	displayError(`An Error occured, please try to login again <br/> ${msg} <br/> Redirecting in ${delay / 1000} seconds...`, true);
+	setTimeout(() => window.location.replace(redirect), delay);
 };
 
 async function fetchJson(url) {
@@ -133,12 +134,16 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 				playtime_forever,
 				rtime_last_played,
 				playtime_2weeks,
+				appid
+			} = game;
+
+			const {
 				header_image,
 				screenshots
-			} = await fetchAppDetails(game.appid);
+			} = await fetchAppDetails(appid);
 
 			const lastPlayedTimestamp = parseInt(rtime_last_played, 10);
-			const recentPlayMinutes = playtime_2weeks || 0;
+			const recentPlayMinutes = (playtime_2weeks || 0);
 			const totalHoursPlayed = (playtime_forever / 60).toFixed(1);
 			const lastPlayedDate = lastPlayedTimestamp
 				? new Date(lastPlayedTimestamp * 1000).toLocaleDateString()
@@ -155,9 +160,9 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 <div class="popout-stats-wrapper">
     <div class="popout-stats">
         <div class="popout-time-played">Time played</div>
-        <div>Last two weeks: ${recentPlayMinutes || "Unknown"} min</div>
+        <div>Last two weeks: ${recentPlayMinutes} min</div>
         <div>Total: ${totalHoursPlayed ? totalHoursPlayed + "hrs" : "Unknown"} | ${playtime_forever ? playtime_forever + "min" : "Unknown"}</div>
-        <div>Most played ranking: ${(rankIndex + 1) ? "#" + (rankIndex + 1) : "Unknown"}</div>
+        <div>${/** TODO */"Sort type"} ranking: ${(rankIndex + 1) ? "#" + (rankIndex + 1) : "Unknown"}</div>
         <div>Last played: ${lastPlayedDate ? lastPlayedDate : "Unknown"}</div>
     </div>
 </div>`;
@@ -198,11 +203,11 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 }
 
 
-function createGameCard(game, rankedIds) {
-    const card = document.createElement("section");
-    card.role = "link";
-    card.className = "game-card";
-    card.onclick = () => {
+function createGameCard(game, index, rankedIds) {
+	const card = document.createElement("section");
+	card.role = "link";
+	card.className = "game-card";
+	card.onclick = () => {
 		// Check
 		if (redirectToSite.checked) {
 			window.open(`https://store.steampowered.com/app/${game.appid}`, "_blank");
@@ -211,51 +216,51 @@ function createGameCard(game, rankedIds) {
 		}
 	}
 
-    const shard = document.createElement("div");
-    shard.className = "panel-shard";
+	const shard = document.createElement("div");
+	shard.className = "panel-shard";
 
-    const imgContainer = document.createElement("div");
-    imgContainer.className = "image-container";
+	const imgContainer = document.createElement("div");
+	imgContainer.className = "image-container";
 
-    const img = new Image();
-    img.className = "cover-image";
-    img.alt = game.name || "Game Cover";
+	const img = new Image();
+	img.className = "cover-image";
+	img.alt = game.name || "Game Cover";
 
-    const fallbackImages = [
-        `https://steamcdn-a.akamaihd.net/steam/apps/${game.appid}/library_600x900_2x.jpg`,
-        `https://shared.steamstatic.com/store_item_assets/steam/apps/${game.appid}/library_600x900.jpg`,
-        `https://shared.steamstatic.com/store_item_assets/steam/apps/${game.appid}/portrait.png`,
-        "img/defaultappimage.png"
-    ];
+	const fallbackImages = [
+		`https://steamcdn-a.akamaihd.net/steam/apps/${game.appid}/library_600x900_2x.jpg`,
+		`https://shared.steamstatic.com/store_item_assets/steam/apps/${game.appid}/library_600x900.jpg`,
+		`https://shared.steamstatic.com/store_item_assets/steam/apps/${game.appid}/portrait.png`,
+		"img/defaultappimage.png"
+	];
 
-    let fallbackIndex = 0;
-    img.onerror = () => {
-        if (fallbackIndex < fallbackImages.length - 1) {
-            img.src = fallbackImages[++fallbackIndex];
-        } else {
-            img.style.display = "none";
-            const fallbackText = document.createElement('div');
-            fallbackText.className = "fallback-text";
-            fallbackText.textContent = game.name || "Unknown Game";
-            imgContainer.appendChild(fallbackText);
-        }
-    };
+	let fallbackIndex = 0;
+	img.onerror = () => {
+		if (fallbackIndex < fallbackImages.length - 1) {
+			img.src = fallbackImages[++fallbackIndex];
+		} else {
+			img.style.display = "none";
+			const fallbackText = document.createElement('div');
+			fallbackText.className = "fallback-text";
+			fallbackText.textContent = game.name || "Unknown Game";
+			imgContainer.appendChild(fallbackText);
+		}
+	};
 
-    img.src = fallbackImages[0];
-    imgContainer.appendChild(img);
+	img.src = fallbackImages[0];
+	imgContainer.appendChild(img);
 
-    if (rankedIds.includes(game.appid)) {
-        const rank = rankedIds.indexOf(game.appid) + 1;
-        const badge = document.createElement("div");
-        badge.className = `badge rank-${rank}`;
-        badge.innerText = rank;
-        card.appendChild(badge);
-    }
+	if (rankedIds.includes(game.appid)) {
+		const rank = rankedIds.indexOf(game.appid) + 1;
+		const badge = document.createElement("div");
+		badge.className = `badge rank-${rank}`;
+		badge.innerText = rank;
+		card.appendChild(badge);
+	}
 
-    card.append(imgContainer, shard);
-    setupGamePopoutTrigger(card, game, rankedIds.indexOf(game.appid));
+	card.append(imgContainer, shard);
+	setupGamePopoutTrigger(card, game, index);
 
-    return card;
+	return card;
 }
 
 function renderGames(games, sortType) {
@@ -269,7 +274,7 @@ function renderGames(games, sortType) {
 
 		const topIds = sorted.slice(0, 3).map(g => g.appid);
 		gamesContainer.innerHTML = "";
-		sorted.forEach((g) => gamesContainer.appendChild(createGameCard(g, topIds)));
+		sorted.forEach((game, rank) => gamesContainer.appendChild(createGameCard(game, rank, topIds)));
 	} catch (e) {
 		displayError("Render error: " + e.message);
 	}
@@ -303,6 +308,11 @@ async function loadAndRender() {
 		if (!games.length) return clearSessionAndRedirect("No games found.");
 		renderGames(games);
 		renderUserDetails();
+
+
+		// TODO: Improve later
+		const isMobile = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
+		redirectToSite.checked = isMobile;
 	} catch (e) {
 		if (/missing|invalid/i.test(e.message))
 			clearSessionAndRedirect("Invalid Steam ID or API Key. Please log in again.")

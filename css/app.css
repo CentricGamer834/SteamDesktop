@@ -336,7 +336,7 @@ label {
 }
 
 .popout-stats {
-    width: 202px;
+    width: 200px;
     display: flex;
     flex-direction: column;
     padding-top: 4px;
@@ -367,8 +367,7 @@ label {
 
 /** TEMP */
 .input-group {
-    display: flex
-;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: start;
