@@ -149,8 +149,6 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 				? new Date(lastPlayedTimestamp * 1000).toLocaleDateString()
 				: "Never";
 
-			// const { screenshots, header_image, name } = await fetchAppDetails(appid);
-
 			popout = document.createElement("div");
 			popout.className = "popout";
 			popout.innerHTML = `

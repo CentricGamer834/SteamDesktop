@@ -13,7 +13,6 @@ body {
 }
 
 a {
-    display: block;
     width: fit-content;
     font-family: "Motiva Sans", Sans-serif;
     cursor: pointer;
