@@ -163,21 +163,9 @@ function setupGameMenuTrigger(card, game) {
 	});
 
 	function showMenu(x, y) {
-		menu.style.left = `${x}px`;
-		menu.style.top = `${y}px`;
-		menu.style.display = "block";
-
-		const rect = menu.getBoundingClientRect();
-		if (rect.right > window.innerWidth) {
-			menu.style.left = `${window.innerWidth - rect.width - 10}px`;
-		}
-
-		if (rect.bottom > window.innerHeight) {
-			menu.style.top = `${window.innerHeight - rect.height - 10}px`;
-		}
-
 		document.body.appendChild(menuBackdrop);
 		document.body.appendChild(menu);
+		attachFloaterToParent(card, menu);
 	}
 
 	const hideMenu = () => {
@@ -225,7 +213,7 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 		}, 1750);
 	};
 
-	const show = async () => {
+	const showPopout = async () => {
 		try {
 			const {
 				playtime_forever,
@@ -273,7 +261,7 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 	const scheduleShow = () => {
 		clearTimeout(delayIn);
 		clearTimeout(delayOut);
-		delayIn = setTimeout(() => card.matches(":hover") && show(), 200);
+		delayIn = setTimeout(() => card.matches(":hover") && showPopout(), 200);
 	}
 
 	const scheduleRemove = () => {
@@ -296,7 +284,7 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 	// mobile
 	document.addEventListener("touchend", scheduleRemove);
 
-	window.addEventListener("contextmenu", scheduleRemove);
+	window.addEventListener("contextmenu", scheduleRemove );
 	window.addEventListener("mouseleave", scheduleRemove);
 	window.addEventListener("blur", scheduleRemove);
 
