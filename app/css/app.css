@@ -2,12 +2,12 @@ html,
 body {
     margin: 0;
     padding: 0;
-    width: 100%;
     height: 100%;
+  width: 100%;
     overflow: hidden;
     color: #e0e0e0;
     font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
-    background: #1b2838 url(/img/cluster_bg.png) no-repeat bottom center;
+    background: #1b2838 url(../img/cluster_bg.png) no-repeat bottom center;
     user-select: none;
     box-sizing: border-box;
 }
@@ -55,7 +55,7 @@ body {
 }
 
 /** Error Screen, Loading Screen */
-.cover-screen {
+.overlay-screen {
     position: fixed;
     inset: 0;
     z-index: 9999;
@@ -69,20 +69,15 @@ body {
         url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top no-repeat,
         #181a21;
     background-size: cover;
-    /** Default hidden */
-    transition: opacity 1s ease, visibility 1s;
     visibility: visible;
-    opacity: 1;
 }
 
 /** Smooth fade */
-.cover-screen[hidden] {
-    /* 1s delay for visibility */
-    opacity: 0 !important;
+.overlay-screen[hidden] {
     visibility: hidden !important;
 }
 
-.cover-screen img {
+.overlay-screen img {
     -webkit-user-drag: none;
     -webkit-app-region: no-drag;
     pointer-events: none;
@@ -90,47 +85,35 @@ body {
     height: 100px;
 }
 
-.cover-screen p {
+.overlay-screen p {
     font-size: 12px;
     text-transform: uppercase;
     margin-top: 8px;
     font-weight: 500
 }
 
-
-/** Header */
-#header {
-    flex: 0 0 auto;
-    width: 100%;
-    background: #171d25;
-    display: flex;
-    user-select: none;
-    height: 40px;
-    background-color: #181a21;
-    color: #eae8e8;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+.app-container {
+    color: #d3d3d3;
+    height: 100%;
+    overflow: hidden scroll;
 }
 
-
+label {
+    color: #a0a1a5;
+}
 
 /** Game Cards */
-#game-container {
+#games {
+    display: grid;
     width: 100%;
     height: 100%;
     grid-auto-flow: row;
     justify-content: space-between;
-    display: grid;
-    box-sizing: border-box;
-    grid-template-columns: repeat(auto-fill, 222px);
-    grid-auto-rows: 333px;
+    /**default grid layout */
+    grid-template-columns: repeat(auto-fill, 148px);
+    grid-auto-rows: 222px;
     gap: 24px 16px;
-    font-size: 30.2727px;
-    padding: 20px 20px 80px;
-    position: relative;
-    overflow: hidden scroll;
+    padding: 0.5rem;
 }
 
 .game-card {
@@ -199,55 +182,41 @@ body {
     overflow-clip-margin: content-box
 }
 
-#game-container.small {
-    grid-template-columns: repeat(auto-fill, 180px);
-    grid-auto-rows: 270px;
-    gap: 20px 12px
-}
-
-@media (max-width:1024px) {
-    #game-container {
-        grid-template-columns: repeat(auto-fill, 180px);
-        grid-auto-rows: 270px;
-        gap: 20px 12px
-    }
-}
-
-#game-container.smaller {
+#games.small {
     grid-template-columns: repeat(auto-fill, 140px);
     grid-auto-rows: 210px;
     gap: 16px 8px
 }
 
 @media (max-width:768px) {
-    #game-container {
+    #games {
         grid-template-columns: repeat(auto-fill, 140px);
         grid-auto-rows: 210px;
         gap: 16px 8px
     }
 }
 
-#game-container.smallest {
+#games.smaller {
     grid-template-columns: repeat(auto-fill, 100px);
     grid-auto-rows: 150px;
     gap: 12px 6px
 }
 
 @media (max-width:480px) {
-    #game-container {
+    #games {
         grid-template-columns: repeat(auto-fill, 100px);
         grid-auto-rows: 150px;
         gap: 12px 6px
     }
 }
 
-#game-container.tiny {
+#games.tiny {
     grid-template-columns: repeat(auto-fill, 60px);
     grid-auto-rows: 90px;
     gap: 6px 3px
 }
 
-#game-container.huge {
+#games.huge {
     grid-template-columns: repeat(auto-fill, 360px);
     grid-auto-rows: 540px;
     gap: 40px 24px
@@ -390,3 +359,56 @@ body {
     margin-bottom: 2px;
     color: #fff
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.select-label {
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #7a8b9d;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+#size-options {
+    accent-color: #66c0f4;
+    height: 4px;
+    background: transparent;
+    cursor: pointer;
+    min-width: 100px;
+    flex: 1 1 150px;
+}
+
+.labeled-select {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 180px;
+    min-width: 160px;
+}
+
+#sort-options {
+    background-color: #2a2f3a;
+    color: #e0e0e0;
+    border: 1px solid #3b3f4c;
+    padding: 5px 10px;
+    font-size: 13px;
+    border-radius: 2px;
+    width: 100%;
+    min-width: 120px;
+}
+
+

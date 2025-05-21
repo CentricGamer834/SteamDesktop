@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SteamDesktop</title>
+
+    <!-- SEO Meta -->
+    <meta name="description" content="View and launch all your Steam games directly from your desktop.">
+    <meta name="keywords"
+        content="steam, desktop, game launcher, steam library, gaming app, game dashboard, call of diddy, black ops, warzone, mw2, mw3, cod, csgo, counter strike, global offensive, valorant, overwatch">
+    <meta name="author" content="CentricGamer834">
+    <meta name="robots" content="index, follow">
+
+    <!-- PWA/Meta Theme -->
+    <meta name="theme-color" content="#1a1a1a">
+    <link rel="manifest" href="app.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="img/icon_478x478.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SteamDesktop">
+    <meta property="og:description" content="View and launch all your Steam games directly from your desktop.">
+    <meta property="og:image" content="img/icon_478x478.png">
+    <meta property="og:url" content="https://centricgamer834.github.io/SteamDesktop/">
+    <meta property="og:site_name" content="SteamDesktop">
+
+    <!-- Twitter Meta -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SteamDesktop">
+    <meta name="twitter:description" content="View and launch all your Steam games directly from your desktop.">
+    <meta name="twitter:image" content="img/icon_478x478.png">
+
+    <!-- Performance -->
+    <link rel="preconnect" href="https://corsproxy.io" crossorigin>
+    <link rel="dns-prefetch" href="https://corsproxy.io">
+    <link rel="preload" href="css/app.css" as="style">
+    <link rel="preload" href="css/tests.css" as="style">
+    <link rel="preload" href="js/app.js" as="script" type="module">
+
+    <!-- Icons -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/tests.css">
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+    <script type="module">
+        import { registerServiceWorker } from "./js/sw-register.js";
+        window.addEventListener("load", registerServiceWorker);
+    </script>
+</head>
+
+<body>
+    <!-- Screens -->
+    <div id="error-screen" class="overlay-screen" hidden>
+        <img src="img/icon_478x478.png" alt="SteamDesktop Icon">
+        <p>An unexpected error occured...</p>
+    </div>
+
+    <div id="loading-screen" class="overlay-screen">
+        <img src="img/icon_478x478.png" alt="SteamDesktop Icon">
+        <p>Loading...</p>
+    </div>
+
+    <!-- Settings -->
+    <!-- <div id="settings-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <h2>Settings</h2>
+            <label class="select-label" for="size-options">Tile Size</label>
+            <input type="range" id="size-options" min="100" max="300" value="150">
+
+            <div class="labeled-select">
+                <label class="select-label" for="sort-options">Sort Type</label>
+                <select id="sort-options">
+                    <option value="playtime">Sort by Playtime</option>
+                    <option value="name">Sort by Name</option>
+                    <option value="recent">Sort by Recently Played</option>
+                </select>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Main -->
+    <div class="app-container">
+        <div class="user-controls">
+            <div class="user-info">
+                <img src="img/defaultuserimage.png" alt="User Avatar" class="avatar" id="user-avatar">
+                <div class="user-details">
+                    <span class="username" id="user-name">Unknown Soldier</span>
+                    <span class="username" id="user-id">1234567890123ABC</span>
+                </div>
+            </div>
+            <nav class="user-actions">
+                <button class="button" id="settings-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"
+                        fill="none">
+                        <path
+                            d="M33 20.38V15.62L29.07 14.9C28.8121 14.015 28.453 13.1628 28 12.36L30.27 9.08L26.92 5.71L23.64 8C22.8372 7.54696 21.985 7.18793 21.1 6.93L20.38 3H15.62L14.9 6.93C14.015 7.18793 13.1628 7.54696 12.36 8L9.08 5.71L5.71 9.08L8 12.36C7.54696 13.1628 7.18793 14.015 6.93 14.9L3 15.62V20.38L6.93 21.1C7.18793 21.985 7.54696 22.8372 8 23.64L5.71 26.92L9.08 30.29L12.36 28C13.1637 28.4461 14.0159 28.7984 14.9 29.05L15.62 33H20.38L21.1 29.07C21.985 28.8121 22.8372 28.453 23.64 28L26.92 30.27L30.29 26.9L28 23.64C28.4461 22.8363 28.7984 21.9841 29.05 21.1L33 20.38ZM18 23C17.0111 23 16.0444 22.7068 15.2221 22.1573C14.3999 21.6079 13.759 20.827 13.3806 19.9134C13.0022 18.9998 12.9031 17.9945 13.0961 17.0245C13.289 16.0546 13.7652 15.1637 14.4645 14.4645C15.1637 13.7652 16.0546 13.289 17.0245 13.0961C17.9945 12.9031 18.9998 13.0022 19.9134 13.3806C20.827 13.759 21.6079 14.3999 22.1573 15.2221C22.7068 16.0444 23 17.0111 23 18C23 18.6566 22.8707 19.3068 22.6194 19.9134C22.3681 20.52 21.9998 21.0712 21.5355 21.5355C21.0712 21.9998 20.52 22.3681 19.9134 22.6194C19.3068 22.8707 18.6566 23 18 23Z"
+                            fill="currentColor"></path>
+                    </svg>Settings</button>
+                <button class="button" id="logout-button">Logout</button>
+            </nav>
+        </div>
+
+        <main id="games"></main>
+    </div>
+</body>
+
+</html>

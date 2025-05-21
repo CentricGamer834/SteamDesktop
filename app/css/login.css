@@ -1,46 +1,37 @@
 html,
 body {
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-	color: #e0e0e0;
-	font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
-	background: #1b2838 url(/img/cluster_bg.png) no-repeat bottom center;
-	user-select: none;
-	box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    color: #e0e0e0;
+    font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
+    background: url(../img/cluster_bg.png) bottom center no-repeat #1b2838;
+    user-select: none;
+    box-sizing: border-box
 }
 
 a {
     display: block;
     width: fit-content;
-    color: #181A21;
     font-family: "Motiva Sans", Sans-serif;
     cursor: pointer;
     font-weight: 550;
-    color: #ebebeb;
     font-size: 12px;
-    text-align: center;
-    color: #afafaf;
+    color: #afafaf
 }
 
-
-
 .login-screen {
-    background: radial-gradient(rgba(24, 26, 33, 0) 0%, #181A21 100%) fixed no-repeat,
-        url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top no-repeat,
-        #1b2838;
-    background-size: cover;
+    background: radial-gradient(rgba(24, 26, 33, 0) 0, #181a21 100%) 0 0/cover no-repeat fixed, url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top/cover no-repeat, 0 0/cover #1b2838;
     position: fixed;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center;
     color: #eae8e8;
     z-index: 99999;
-    inset: 0;
+    inset: 0
 }
 
 #login-form {
@@ -49,20 +40,20 @@ a {
     padding: 22px 30px;
     width: 100%;
     max-width: 450px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .5);
     display: grid;
-    gap: 16px;
+    gap: 16px
 }
 
 #login-form.login-error .cred-input {
-    border-color: #c15755;
+    border-color: #c15755
 }
 
 #login-form.login-error #error-display {
     color: #c15755;
     font-size: 12px;
     font-weight: 500;
-    text-align: center;
+    text-align: center
 }
 
 .input-wrapper {
@@ -74,7 +65,6 @@ a {
 
 .input-wrapper.row {
     flex-direction: row;
-    text-align: center;
     justify-content: center;
 }
 
@@ -82,7 +72,7 @@ a {
     font-size: 12px;
     color: #afafaf;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: .02em;
     user-select: none;
     margin: 4px 0
 }
@@ -92,44 +82,67 @@ a {
     color: #fff;
     padding: 10px;
     background-color: #32353c;
-    outline: none;
+    outline: 0;
     font-size: 15px;
-    border: 1px solid #32353c;
+    border: 1px solid rgba(255, 255, 255, 0.333);
 }
 
 .button-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 10px
 }
 
 .button-container [type=submit]#submit {
     width: 100%;
     max-width: 270px;
-    background: linear-gradient(90deg, #06bfff 0%, #2d73ff 100%);
+    background: linear-gradient(90deg, #06bfff 0, #2d73ff 100%);
     border-radius: 2px;
     border: none;
     padding: 12px;
     color: #fff;
     font-size: 16px;
     font-weight: 400;
-    cursor: pointer;
+    cursor: pointer
 }
 
 .button-container [type=submit]#submit[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
+    opacity: .5;
+    cursor: not-allowed
 }
 
-@media (max-width: 480px) {
-    #login-centered-form {
-        padding: 16px;
+@media (max-width: 768px) {
+    #login-form {
+        padding: 1rem;
         max-width: 90vw;
     }
 
     .button-container button {
-        font-size: 15px;
-        padding: 10px;
+        font-size: 0.9rem;
+        padding: 0.65rem;
+    }
+}
+
+@media (max-width: 480px) {
+    html, body {
+        font-size: 14px;
+    }
+
+    .login-screen {
+        padding: 2vw;
+    }
+
+    #login-form {
+        padding: 1rem;
+    }
+
+    .cred-input {
+        font-size: 0.95rem;
+    }
+
+    .button-container [type=submit]#submit {
+        font-size: 0.95rem;
+        padding: 0.65rem;
     }
 }
