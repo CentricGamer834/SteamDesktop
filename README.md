@@ -1,4 +1,4 @@
-[![SteamDesktop Logo](app/img/icon_478x478.png)](https://github.com/CentricGamer834/SteamDesktop)
+[![SteamDesktop Logo](img/icon_478x478.png)](https://github.com/CentricGamer834/SteamDesktop)
 
 # SteamDesktop !
 View all of your Steam games easily on your Desktop!

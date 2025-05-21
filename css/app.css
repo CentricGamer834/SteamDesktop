@@ -109,11 +109,11 @@ label {
     height: 100%;
     grid-auto-flow: row;
     justify-content: space-between;
-    /**default grid layout */
-    grid-template-columns: repeat(auto-fill, 148px);
-    grid-auto-rows: 222px;
-    gap: 24px 16px;
     padding: 0.5rem;
+    /**default grid layout */
+    grid-template-columns: repeat(auto-fill, 222px);
+    grid-auto-rows: 333px;
+    gap: 24px 16px;
 }
 
 .game-card {

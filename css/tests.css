@@ -13,25 +13,24 @@
     gap: 12px;
 }
 
-.user-info .user-details {
+#user-details {
     display: flex;
     flex-direction: column;
 }
 
-.user-details .user-avatar {
+#user-avatar {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
     object-fit: cover;
 }
 
-.user-details .user-name {
+#user-name {
     font-weight: 600;
     font-size: 1rem;
     user-select: none;
 }
 
-.user-details .user-actions {
+.user-actions {
     display: flex;
     gap: 12px;
 }

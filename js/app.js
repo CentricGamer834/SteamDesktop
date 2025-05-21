@@ -601,6 +601,5 @@ async function loadAndRender() {
 }
 
 logoutBtn.onclick = () => clearSessionAndRedirect("Logging out...", "login.html", 500);
-openSettingsBtn.onclick = () => settingsModal.removeAttribute("hidden");
 
 loadAndRender();
