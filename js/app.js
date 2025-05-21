@@ -270,11 +270,11 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 		}
 	};
 
-	card.addEventListener("mouseenter", () => {
+	const scheduleShow = () => {
 		clearTimeout(delayIn);
 		clearTimeout(delayOut);
 		delayIn = setTimeout(() => card.matches(":hover") && show(), 200);
-	});
+	}
 
 	const scheduleRemove = () => {
 		clearTimeout(delayIn);
@@ -285,8 +285,17 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 		window.removeEventListener("blur", scheduleRemove);
 	};
 
+	// show
+	card.addEventListener("touchstart", scheduleShow);
+	// mobile
+	card.addEventListener("mouseenter", scheduleShow);
+
+	// hide
 	card.addEventListener("mouseleave", scheduleRemove);
 	card.addEventListener("mouseout", scheduleRemove);
+	// mobile
+	document.addEventListener("touchend", scheduleRemove);
+
 	window.addEventListener("contextmenu", scheduleRemove);
 	window.addEventListener("mouseleave", scheduleRemove);
 	window.addEventListener("blur", scheduleRemove);
