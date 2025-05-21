@@ -3,7 +3,7 @@ body {
     margin: 0;
     padding: 0;
     height: 100%;
-  width: 100%;
+    width: 100%;
     overflow: hidden;
     color: #e0e0e0;
     font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
@@ -365,39 +365,43 @@ label {
 
 
 
+/** TEMP */
+.input-group {
+    display: flex
+;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    text-align: center;
+}
 
+.input-group.row {
+    flex-direction: row;
+}
 
-
-
-
-
-
-
-.select-label {
+.label {
     font-weight: 500;
     text-transform: uppercase;
     color: #7a8b9d;
     font-size: 11px;
     letter-spacing: 0.04em;
     margin-right: 6px;
-    flex-shrink: 0;
 }
 
-#size-options {
+.labeled {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 160px;
+}
+
+/* #size-options {
     accent-color: #66c0f4;
     height: 4px;
     background: transparent;
     cursor: pointer;
     min-width: 100px;
     flex: 1 1 150px;
-}
-
-.labeled-select {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: 1 1 180px;
-    min-width: 160px;
 }
 
 #sort-options {
@@ -409,6 +413,61 @@ label {
     border-radius: 2px;
     width: 100%;
     min-width: 120px;
+} */
+
+
+
+/** TODO REVISE THIS **/
+.user-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 6px 24px;
+    color: #ddd;
 }
 
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
+#user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+#user-avatar {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
+
+#user-name {
+    font-weight: 600;
+    font-size: 1rem;
+    user-select: none;
+}
+
+.user-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.button {
+    background: transparent;
+    border: 1px solid #555;
+    color: #ccc;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.button:hover {
+    background-color: #444;
+    border-color: #888;
+    color: #fff;
+}
