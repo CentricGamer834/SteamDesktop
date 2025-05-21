@@ -307,14 +307,14 @@ const openSettingsBtn = document.getElementById("settings-button");
 
 const showLoading = () => loadingScreen.removeAttribute("hidden");
 const hideLoading = () => loadingScreen.setAttribute("hidden", "true");
-const displayError = (msg, isFatal = false) => {
+const displayError = (msg, isFatal = true) => {
     errorScreen.innerHTML = `
-        <img src="icon.png" alt="Error Icon" />
-        <p>${msg}</p>
-        <div class="error-actions">
-            <a href="javascript:location.reload()">Reload</a>
-            ${isFatal ? '<a href="login.html">Return to Login</a>' : ''}
-        </div>
+<img src="img/icon_478x478.png" alt="Error Icon" />
+<p>${msg}</p>
+<div class="error-actions">
+    <a href="javascript:location.reload()">Reload</a>
+    ${isFatal ? '<a href="login.html">Return to Login</a>' : ''}
+</div>
     `;
 
     errorScreen.removeAttribute("hidden");
@@ -324,7 +324,7 @@ const displayError = (msg, isFatal = false) => {
 const clearSessionAndRedirect = (msg, redirect = "login.html", delay = 3000) => {
     localStorage.removeItem('steamId');
     localStorage.removeItem('apiKey');
-    displayError(`${msg} <br/> Redirecting in ${delay / 1000} seconds...`, true);
+    displayError(`An Error occured, please try to login again <br/> ${msg} <br/> Redirecting in ${delay / 1000} seconds...`, true);
     setTimeout(() => window.location.replace(redirect), delay);
 };
 
