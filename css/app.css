@@ -17,13 +17,21 @@ a {
     font-family: "Motiva Sans", Sans-serif;
     cursor: pointer;
     font-weight: 550;
-    font-size: 12px;
+    font-size: 14px;
     color: #afafaf;
+    margin: 0 8px;
+}
+
+img {
+    -webkit-user-drag: none;
+    -webkit-app-region: no-drag;
+    pointer-events: none;
 }
 
 [hidden] {
     display: none !important;
 }
+
 /** Custom Scrollbar **/
 
 ::-webkit-scrollbar {
@@ -67,6 +75,11 @@ a {
 }
 
 /** Error Screen, Loading Screen */
+#error-screen p {
+    color: #ed1818;
+    font-size: 1rem;
+}
+
 .overlay-screen {
     position: fixed;
     inset: 0;
@@ -83,7 +96,6 @@ a {
     background-size: cover;
     visibility: visible;
 }
-
 
 .overlay-screen img {
     -webkit-user-drag: none;
@@ -114,10 +126,54 @@ a {
     color: #ddd;
     padding: 0.5rem 1.5rem;
     border-bottom: 1px solid #fff;
-    height: 4rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    height: 3rem;
     flex: 0 0 auto;
-    overflow: auto;
 }
+
+.controls-topbar .button {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 8px 16px;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+#user-avatar {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
+
+#user-name,
+#user-id {
+    user-select: all;
+}
+
+#user-name {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.user-actions {
+    display: flex;
+    overflow-x: scroll;
+    gap: 12px;
+}
+
 
 /** Game Cards */
 #games {
@@ -237,8 +293,6 @@ a {
     grid-auto-rows: 540px;
     gap: 40px 24px
 }
-
-
 
 /** Game Badges */
 .badge {
@@ -383,11 +437,16 @@ a {
 
 /** TEMP */
 .input-group {
-    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: start;
     text-align: center;
+    display: inline-flex;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    /* prevent label wrapping */
 }
 
 .input-group.row {
@@ -408,8 +467,7 @@ label {
 .labeled {
     display: flex;
     align-items: center;
-    gap: 6px;
-    min-width: 160px;
+    gap: 8px;
 }
 
 /* #size-options {
@@ -433,34 +491,6 @@ label {
 } */
 
 
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-#user-details {
-    display: flex;
-    flex-direction: column;
-}
-
-#user-avatar {
-    width: 32px;
-    height: 32px;
-    object-fit: cover;
-}
-
-#user-name {
-    font-weight: 600;
-    font-size: 1rem;
-    user-select: none;
-}
-
-.user-actions {
-    display: flex;
-    gap: 12px;
-}
 
 .button {
     background: transparent;

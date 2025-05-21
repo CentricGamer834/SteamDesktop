@@ -51,7 +51,7 @@ async function fetchOwnedGames() {
 	const url = `${PROXY_URL}https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamUserId}&include_appinfo=1&include_played_free_games=1&format=json`;
 	const data = await fetchJson(url);
 	if (!data?.response?.games?.length) throw new Error("No games found.");
-	return data.response.games;
+	return data.response.games || {};
 }
 
 async function fetchAppDetails(appId) {
@@ -61,32 +61,9 @@ async function fetchAppDetails(appId) {
 }
 
 async function fetchUserDetails() {
-	try {
-		const url = `${PROXY_URL}https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${steamApiKey}&steamids=${steamUserId}`;
-		const data = await fetchJson(url);
-
-		const player = data?.response?.players?.[0];
-		if (!player) throw new Error("Player not found.");
-
-		return {
-			id: player.steamid,
-			name: player.personaname,
-			avatarSmall: player.avatar,
-			avatarMedium: player.avatarmedium,
-			avatarFull: player.avatarfull,
-			profileUrl: player.profileurl,
-			country: player.loccountrycode || "Unknown",
-			lastOnline: player.lastlogoff
-				? new Date(player.lastlogoff * 1000).toLocaleString()
-				: "Never",
-			joinedAt: player.timecreated
-				? new Date(player.timecreated * 1000).toLocaleDateString()
-				: "Unknown",
-			visibility: player.communityvisibilitystate === 3 ? "Public" : "Private",
-		} || {};
-	} catch (err) {
-		throw err;
-	}
+	const url = `${PROXY_URL}https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${steamApiKey}&steamids=${steamUserId}`;
+	const data = await fetchJson(url);
+	return data.response.players?.[0] || {};
 }
 
 function attachFloaterToParent(parent, popout) {
@@ -273,18 +250,11 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 		window.removeEventListener("blur", scheduleRemove);
 	};
 
-	// show
-	card.addEventListener("touchstart", scheduleShow);
-	// mobile
 	card.addEventListener("mouseenter", scheduleShow);
 
-	// hide
 	card.addEventListener("mouseleave", scheduleRemove);
 	card.addEventListener("mouseout", scheduleRemove);
-	// mobile
-	document.addEventListener("touchend", scheduleRemove);
-
-	window.addEventListener("contextmenu", scheduleRemove );
+	window.addEventListener("contextmenu", scheduleRemove);
 	window.addEventListener("mouseleave", scheduleRemove);
 	window.addEventListener("blur", scheduleRemove);
 
@@ -292,11 +262,176 @@ function setupGamePopoutTrigger(card, game, rankIndex) {
 		if (popout && !card.contains(e.target) && !popout.contains(e.target)) clear();
 	});
 }
+// function setupGamePopoutTrigger(card, game, rankIndex) {
+//   let popout = null;
+//   let delayIn, delayOut, carousel;
+
+//   const clear = () => {
+//     if (popout) {
+//       popout.remove();
+//       popout = null;
+//       card.removeAttribute("aria-expanded");
+//       card.removeAttribute("aria-controls");
+//     }
+//     if (carousel) clearInterval(carousel);
+//   };
+
+//   const startCarousel = (imgs) => {
+//     const el = popout.querySelector(".popout-carousel");
+//     let i = 0;
+//     el.style.backgroundImage = `url(${imgs[0].path_thumbnail || ""})`;
+//     carousel = setInterval(() => {
+//       i = (i + 1) % imgs.length;
+//       el.style.backgroundImage = `url(${imgs[i].path_thumbnail || ""})`;
+//     }, 1750);
+//   };
+
+//   const showPopout = async () => {
+//     if (popout) return; // prevent multiple popouts
+//     try {
+//       const {
+//         playtime_forever,
+//         rtime_last_played,
+//         playtime_2weeks,
+//         appid
+//       } = game;
+
+//       const {
+//         header_image,
+//         screenshots
+//       } = await fetchAppDetails(appid);
+
+//       const lastPlayedTimestamp = parseInt(rtime_last_played, 10);
+//       const recentPlayMinutes = (playtime_2weeks || 0);
+//       const totalHoursPlayed = (playtime_forever / 60).toFixed(1);
+//       const lastPlayedDate = lastPlayedTimestamp
+//         ? new Date(lastPlayedTimestamp * 1000).toLocaleDateString()
+//         : "Never";
+
+//       popout = document.createElement("div");
+//       popout.className = "popout";
+//       popout.setAttribute("role", "dialog");
+//       popout.setAttribute("aria-modal", "true");
+//       popout.setAttribute("tabindex", "-1");
+//       popout.id = `popout-${game.appid}`;
+//       card.setAttribute("aria-expanded", "true");
+//       card.setAttribute("aria-controls", popout.id);
+
+//       popout.innerHTML = `
+//         <div class="popout-title" id="popout-title-${game.appid}">${game.name || "Unknown Game"}</div>
+//         <div class="popout-carousel" style="background-image: url(${header_image || ""});" aria-label="Game screenshots carousel"></div>
+//         <div class="popout-seperator"></div>
+//         <div class="popout-stats-wrapper">
+//           <div class="popout-stats" aria-describedby="popout-title-${game.appid}">
+//             <div class="popout-time-played">Time played</div>
+//             <div>Last two weeks: ${recentPlayMinutes} min</div>
+//             <div>Total: ${totalHoursPlayed ? totalHoursPlayed + "hrs" : "Unknown"} | ${playtime_forever ? playtime_forever + "min" : "Unknown"}</div>
+//             <div>Sort type ranking: ${(rankIndex + 1) ? "#" + (rankIndex + 1) : "Unknown"}</div>
+//             <div>Last played: ${lastPlayedDate ? lastPlayedDate : "Unknown"}</div>
+//           </div>
+//         </div>
+//       `;
+
+//       document.body.appendChild(popout);
+//       attachFloaterToParent(card, popout);
+//       popout.classList.add("show");
+
+//       // focus on popout for keyboard users
+//       popout.focus();
+
+//       if (screenshots?.length) startCarousel(screenshots);
+
+//       // Close on outside tap (mobile)
+//       const onClickOutside = (e) => {
+//         if (popout && !popout.contains(e.target) && !card.contains(e.target)) {
+//           clear();
+//           document.removeEventListener("mousedown", onClickOutside);
+//           document.removeEventListener("touchstart", onClickOutside);
+//         }
+//       };
+//       document.addEventListener("mousedown", onClickOutside);
+//       document.addEventListener("touchstart", onClickOutside);
+
+//       // Keyboard support inside popout: close on Escape
+//       popout.addEventListener("keydown", (e) => {
+//         if (e.key === "Escape") {
+//           clear();
+//           card.focus();
+//         }
+//       });
+
+//     } catch (err) {
+//       console.error("Popout error:", err);
+//     }
+//   };
+
+//   const scheduleShow = () => {
+//     clearTimeout(delayIn);
+//     clearTimeout(delayOut);
+//     delayIn = setTimeout(() => {
+//       if (card.matches(":hover") || card.matches(":focus")) showPopout();
+//     }, 200);
+//   };
+
+//   const scheduleRemove = () => {
+//     clearTimeout(delayIn);
+//     delayOut = setTimeout(clear, 200);
+
+//     window.removeEventListener("contextmenu", scheduleRemove);
+//     window.removeEventListener("mouseleave", scheduleRemove);
+//     window.removeEventListener("blur", scheduleRemove);
+//   };
+
+//   // Event listeners
+
+//   // Open on touch or mouse enter or keyboard focus + Enter/Space
+//   card.addEventListener("touchstart", (e) => {
+//     e.preventDefault(); // prevent double events
+//     if (popout) {
+//       clear();
+//     } else {
+//       showPopout();
+//     }
+//   });
+
+//   card.addEventListener("mouseenter", scheduleShow);
+//   card.addEventListener("focus", scheduleShow);
+
+//   card.addEventListener("keydown", (e) => {
+//     if (e.key === "Enter" || e.key === " ") {
+//       e.preventDefault();
+//       if (popout) {
+//         clear();
+//       } else {
+//         showPopout();
+//       }
+//     }
+//     if (e.key === "Escape" && popout) {
+//       clear();
+//       card.blur();
+//     }
+//   });
+
+//   // Close on mouse leave or touch end/cancel/move
+//   card.addEventListener("mouseleave", scheduleRemove);
+//   card.addEventListener("mouseout", scheduleRemove);
+//   card.addEventListener("touchend", scheduleRemove);
+//   card.addEventListener("touchcancel", scheduleRemove);
+//   card.addEventListener("touchmove", scheduleRemove);
+
+//   window.addEventListener("contextmenu", scheduleRemove);
+//   window.addEventListener("mouseleave", scheduleRemove);
+//   window.addEventListener("blur", scheduleRemove);
+
+//   document.addEventListener("mousemove", (e) => {
+//     if (popout && !card.contains(e.target) && !popout.contains(e.target)) clear();
+//   });
+// }
 
 function createGameCard(game, index, rankedIds) {
 	const card = document.createElement("section");
-	card.role = "link";
 	card.className = "game-card";
+	card.setAttribute("role", "link");
 	card.onclick = () => {
 		// Todo
 		if (redirectToSite.checked) {
@@ -369,22 +504,22 @@ function renderGames(games, sortType) {
 
 async function renderUserDetails() {
 	const {
-		avatarMedium,
-		name,
-		id
+		avatarmedium,
+		personaname,
+		steamid
 	} = await fetchUserDetails();
 
 	const userAvatar = document.getElementById("user-avatar");
-	userAvatar.src = avatarMedium;
+	userAvatar.src = avatarmedium || "img/defaultuserimage.png";
 	userAvatar.onerror = () => {
-		userAvatar.src = "defaultuserimage.png";
+		userAvatar.src = "img/defaultuserimage.png";
 	}
 
 	const userName = document.getElementById("user-name");
-	userName.innerText = name || "Unknown User";
+	userName.innerText = personaname || "Unknown User";
 
 	const userId = document.getElementById("user-id");
-	userId.innerText = id || "Unknown ID";
+	userId.innerText = steamid || "Unknown ID";
 }
 
 async function loadAndRender() {
@@ -412,7 +547,7 @@ async function loadAndRender() {
 
 logoutBtn.onclick = () => clearSessionAndRedirect("Logging out...", "login.html", 500);
 openSettingsBtn.onclick = () => {
-	settingsModal.removeAttribute("hidden");
+	settingsModal.toggleAttribute("hidden");
 }
 
 loadAndRender();
