@@ -5,11 +5,10 @@ import { storage } from "./storageManager.js";
 	// TODO: proxy stuff
 	const PROXY_URL = "https://corsproxy.io/?";
 	const steamUserId = storage.get("steamId");
-	const steamApiKey = storage.get("apiKey");
+	const steamApiKey = storage.get("steamApiKey");
 
 	// #region DOM Elements
 	const $ = (id) => document.getElementById(id);
-
 	const loadingScreen = $("loading-screen");
 	const errorScreen = $("error-screen");
 	const gamesContainer = $("games");
@@ -24,25 +23,36 @@ import { storage } from "./storageManager.js";
 	// #endregion DOM Elements
 
 	// #region UI Functions
-	const showLoading = () => loadingScreen.removeAttribute("hidden");
-	const hideLoading = () => loadingScreen.setAttribute("hidden", "true");
-	const displayError = (msg, isFatal = true) => {
-		errorScreen.innerHTML = `
-<img src="img/icon_478x478.png" alt="Error Icon" />
-<p>${msg}</p>
-<div class="error-actions">
-    <a href="javascript:location.reload()">Reload</a>
-    ${isFatal ? '<a href="login.html">Return to Login</a>' : ''}
-</div>
-    `;
+	const showLoading = () => loadingScreen.hidden = false;
+	const hideLoading = () => loadingScreen.hidden = true;
 
-		errorScreen.removeAttribute("hidden");
+	const displayError = (message, isFatal = true) => {
+		const errorScreenMsg = $("error-screen-message");
+		errorScreenMsg.textContent = ""; // clear previous error
+
+		const header = document.createElement("p");
+		header.innerHTML = `${isFatal ? "A fatal error has occurred!" : "An error has occurred!"}<br/>${message}`;
+
+		const actionLink = document.createElement("a");
+		actionLink.textContent = isFatal ? "Login again" : "Refresh page";
+		actionLink.onclick = isFatal
+			? () => clearSessionAndRedirect(message)
+			: () => location.reload();
+
+		const errorActions = document.createElement("div");
+		errorActions.className = "error-actions";
+		errorActions.appendChild(actionLink);
+
+		errorScreenMsg.appendChild(header);
+		errorScreenMsg.appendChild(errorActions);
+
+		errorScreen.hidden = false;
 		hideLoading();
 	};
 
 	const clearSessionAndRedirect = (msg, redirect = "login.html", delay = 3000) => {
 		storage.clear();
-		displayError(`An error may have occured, Please login again <br/> ${msg} <br/> Redirecting in ${delay / 1000} seconds...`, true);
+		displayError(`Redirecting to login in ${delay / 1000} seconds...`, true);
 		setTimeout(() => window.location.replace(redirect), delay);
 	};
 
@@ -145,29 +155,28 @@ import { storage } from "./storageManager.js";
 		};
 
 		const showPopout = async () => {
-			try {
-				const {
-					playtime_forever,
-					rtime_last_played,
-					playtime_2weeks,
-					appid
-				} = game;
+			const {
+				playtime_forever,
+				rtime_last_played,
+				playtime_2weeks,
+				appid
+			} = game;
 
-				const {
-					header_image,
-					screenshots
-				} = await fetchAppDetails(appid);
+			const {
+				header_image,
+				screenshots
+			} = await fetchAppDetails(appid);
 
-				const lastPlayedTimestamp = parseInt(rtime_last_played, 10);
-				const recentPlayMinutes = (playtime_2weeks || 0);
-				const totalHoursPlayed = (playtime_forever / 60).toFixed(1);
-				const lastPlayedDate = lastPlayedTimestamp
-					? new Date(lastPlayedTimestamp * 1000).toLocaleDateString()
-					: "Never";
+			const lastPlayedTimestamp = parseInt(rtime_last_played, 10);
+			const recentPlayMinutes = (playtime_2weeks || 0);
+			const totalHoursPlayed = (playtime_forever / 60).toFixed(1);
+			const lastPlayedDate = lastPlayedTimestamp
+				? new Date(lastPlayedTimestamp * 1000).toLocaleDateString()
+				: "Never";
 
-				popout = document.createElement("div");
-				popout.className = "game-info-popout";
-				popout.innerHTML = `
+			popout = document.createElement("div");
+			popout.className = "game-info-popout";
+			popout.innerHTML = `
 <div class="popout-title">${game.name || "Unknown Game"}</div>
 <div class="popout-carousel" style="background-image: url(${header_image || ""});"></div>
 <div class="popout-seperator"></div>
@@ -180,13 +189,10 @@ import { storage } from "./storageManager.js";
         <div>Last played: ${lastPlayedDate ? lastPlayedDate : "Unknown"}</div>
     </div>
 </div>`;
-				document.body.appendChild(popout);
-				attachFloaterToParent(card, popout);
-				popout.classList.add("show");
-				if (screenshots?.length) startCarousel(screenshots);
-			} catch (err) {
-				console.error("Popout error:", err);
-			}
+			document.body.appendChild(popout);
+			attachFloaterToParent(card, popout);
+			popout.classList.add("show");
+			if (screenshots?.length) startCarousel(screenshots);
 		};
 
 		const scheduleShow = () => {
@@ -216,28 +222,27 @@ import { storage } from "./storageManager.js";
 		});
 	}
 
-	function createGameCard(game, index, rankedIds) {
+	function createGameCard(data, index, rankedIds) {
 		const gameCard = document.createElement("section");
 		gameCard.className = "game-card";
 		gameCard.setAttribute("role", "link");
 		gameCard.onclick = () => {
 			// TODO
 			if (storage.get("redirectToSite")) {
-				window.open(`https://store.steampowered.com/app/${game.appid}`, "_blank");
+				window.open(`https://store.steampowered.com/app/${data.appid}`, "_blank");
 			} else {
-				window.open(`steam://rungameid/${game.appid}`, "_blank");
+				window.open(`steam://rungameid/${data.appid}`, "_blank");
 			}
 		}
 
 		const coverImg = new Image();
 		coverImg.className = "cover-image";
-		coverImg.alt = game.name || `${game.name} cover image`;
+		coverImg.alt = data.name || `${data.name} cover image`;
 
 		const fallbackImages = [
-			`https://steamcdn-a.akamaihd.net/steam/apps/${game.appid}/library_600x900_2x.jpg`,
-			`https://shared.steamstatic.com/store_item_assets/steam/apps/${game.appid}/library_600x900.jpg`,
-			`https://shared.steamstatic.com/store_item_assets/steam/apps/${game.appid}/portrait.png`,
-			"img/defaultappimage.png"
+			`https://steamcdn-a.akamaihd.net/steam/apps/${data.appid}/library_600x900_2x.jpg`,
+			`https://shared.steamstatic.com/store_item_assets/steam/apps/${data.appid}/library_600x900.jpg`,
+			`https://shared.steamstatic.com/store_item_assets/steam/apps/${data.appid}/portrait.png`
 		];
 
 		let fallbackIndex = 0;
@@ -245,10 +250,11 @@ import { storage } from "./storageManager.js";
 			if (fallbackIndex < fallbackImages.length - 1) {
 				coverImg.src = fallbackImages[++fallbackIndex];
 			} else {
-				coverImg.style.display = "none";
-				const fallbackText = document.createElement('div');
+				coverImg.src = "img/defaultappimage.png";
+
+				const fallbackText = document.createElement("div");
 				fallbackText.className = "fallback-text";
-				fallbackText.textContent = game.name || "Unknown Game";
+				fallbackText.textContent = data.name || "Unknown Game";
 				gameCard.appendChild(fallbackText);
 			}
 		};
@@ -277,8 +283,8 @@ import { storage } from "./storageManager.js";
 
 		// Show badges if enabled
 		if (storage.get("showBadges") === true) {
-			if (rankedIds.includes(game.appid)) {
-				const rank = rankedIds.indexOf(game.appid) + 1;
+			if (rankedIds.includes(data.appid)) {
+				const rank = rankedIds.indexOf(data.appid) + 1;
 				const badge = document.createElement("div");
 				badge.className = `game-rank-badge rank-${rank}`;
 				badge.innerText = rank;
@@ -287,36 +293,31 @@ import { storage } from "./storageManager.js";
 		}
 
 		// functionality triggers
-		setupGamePopoutTrigger(gameCard, game, index);
-		setupGameCtxMenuTrigger(gameCard, game);
+		setupGamePopoutTrigger(gameCard, data, index);
+		setupGameCtxMenuTrigger(gameCard, data);
 
 		return gameCard;
 	}
 
 	function sortAndRankThenRenderGames(gamesList) {
-		try {
-			switch (storage.get("sortType")) {
-				case "name":
-					gamesList.sort((a, b) => a.name.localeCompare(b.name));
-					break;
-				case "recent":
-					gamesList.sort((a, b) => b.rtime_last_played - a.rtime_last_played);
-					break;
-				default:
-					gamesList.sort((a, b) => b.playtime_forever - a.playtime_forever);
-			}
-
-			const topIds = gamesList.slice(0, 3).map(g => g.appid);
-
-			// clear games container
-			gamesContainer.innerHTML = "";
-
-			gamesList.forEach((game, rank) =>
-				gamesContainer.appendChild(createGameCard(game, rank, topIds))
-			);
-		} catch (e) {
-			displayError("Render error: " + e.message);
+		switch (storage.get("sortType")) {
+			case "name":
+				gamesList.sort((a, b) => a.name.localeCompare(b.name));
+				break;
+			case "recent":
+				gamesList.sort((a, b) => b.rtime_last_played - a.rtime_last_played);
+				break;
+			default:
+				gamesList.sort((a, b) => b.playtime_forever - a.playtime_forever);
 		}
+
+		const topIds = gamesList.slice(0, 3).map(g => g.appid);
+
+		// clear games container
+		gamesContainer.innerHTML = "";
+		gamesList.forEach((game, rank) =>
+			gamesContainer.appendChild(createGameCard(game, rank, topIds))
+		);
 	}
 
 	async function renderUserDetails() {
@@ -348,6 +349,11 @@ import { storage } from "./storageManager.js";
 					{ value: "name", label: "Name" }
 				]
 			},
+			includeFreeGames: {
+				label: "Display free games",
+				value: true,
+				type: "checkbox"
+			},
 			redirectToSite: {
 				label: "Open links in browser",
 				value: false,
@@ -362,7 +368,17 @@ import { storage } from "./storageManager.js";
 				label: "Bad internet? Reduce network usage.",
 				value: false,
 				type: "checkbox"
-			}
+			},
+			// steamId: {
+			// 	label: "Steam ID",
+			// 	value: steamUserId || null,
+			// 	type: "text"
+			// },
+			// steamApiKey: {
+			// 	label: "Steam API Key",
+			// 	value: steamApiKey || null,
+			// 	type: "text"
+			// },
 		};
 
 		const container = $("settings-container");
@@ -398,7 +414,9 @@ import { storage } from "./storageManager.js";
 			} else if (type === "checkbox") {
 				settingsInput = document.createElement("input");
 				settingsInput.type = "checkbox";
-				settingsInput.checked = storage.get(key) ?? value;
+
+				if (storage.get(key) === true)
+					settingsInput.checked = true
 			} else {
 				settingsInput = document.createElement("input");
 				settingsInput.type = "text";
@@ -426,8 +444,18 @@ import { storage } from "./storageManager.js";
 				acc[key] = storage.get(key);
 				return acc;
 			}, {});
+
 			storage.setAll(settings);
 			settingsModal.hidden = true;
+
+			// Reload the page to apply changes
+			//
+			//
+			// Todo replace with a better way to apply changes
+			location.reload();
+			//
+			//
+			//
 		});
 
 		// Reset to default settings
@@ -443,6 +471,14 @@ import { storage } from "./storageManager.js";
 					}
 				}
 			});
+			// Reload the page to apply changes
+			//
+			//
+			// Todo replace with a better way to apply changes
+			location.reload();
+			//
+			//
+			//
 		});
 
 		// Close listeners
@@ -472,9 +508,9 @@ import { storage } from "./storageManager.js";
 		}
 	}
 
-	async function fetchOwnedGames() {
+	async function fetchOwnedGames(include_played_free_games = true) {
 		if (!steamUserId || !steamApiKey) throw new Error("Missing Steam credentials.");
-		const url = `${PROXY_URL}https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamUserId}&include_appinfo=1&include_played_free_games=1&format=json`;
+		const url = `${PROXY_URL}https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamUserId}&include_appinfo=1&include_played_free_games=${include_played_free_games ? "1" : "0"}&format=json`;
 		const data = await fetchJson(url);
 		if (!data?.response?.games?.length) throw new Error("No games found.");
 		return data.response.games || {};
@@ -496,11 +532,15 @@ import { storage } from "./storageManager.js";
 	// #region INIT
 	async function loadAndRender() {
 		showLoading();
-		errorScreen.setAttribute("hidden", "true");
+
 		try {
-			const games = await fetchOwnedGames();
+			const games = await fetchOwnedGames(
+				storage.get("includeFreeGames")
+			);
+
 			if (!games.length) return clearSessionAndRedirect("No games found.");
 			logoutBtn.onclick = () => clearSessionAndRedirect("Logging out...", "login.html", 500);
+
 			renderAppSettings();
 			sortAndRankThenRenderGames(games);
 			renderUserDetails();
@@ -515,8 +555,6 @@ import { storage } from "./storageManager.js";
 	}
 
 
-	document.addEventListener("DOMContentLoaded", () => {
-		loadAndRender();
-	});
+	document.addEventListener("DOMContentLoaded", loadAndRender);
 	// #endregion INIT
-})()
+})();

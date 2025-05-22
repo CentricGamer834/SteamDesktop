@@ -2,7 +2,6 @@ import { storage } from "./storageManager.js";
 
 (() => {
 	const PROXY_URL = "https://corsproxy.io/?";
-
 	const $ = (id) => document.getElementById(id);
 	const loginForm = $("login-form");
 	const steamIdInput = $("accountId");
@@ -43,12 +42,12 @@ import { storage } from "./storageManager.js";
 		countdown();
 	};
 
-	const validateAndRedirect = async (steamId, apiKey) => {
-		if (!steamId || !apiKey) throw new Error("Missing credentials");
+	const validateAndRedirect = async (steamId, steamApiKey) => {
+		if (!steamId || !steamApiKey) throw new Error("Missing credentials");
 		if (!isValidSteamId(steamId)) throw new Error("Invalid Steam ID (17 digits required)");
-		if (!isValidApiKey(apiKey)) throw new Error("Invalid API Key (32-char hex)");
+		if (!isValidApiKey(steamApiKey)) throw new Error("Invalid API Key (32-char hex)");
 
-		const url = `${PROXY_URL}https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}`;
+		const url = `${PROXY_URL}https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamId}`;
 
 		try {
 			const res = await fetch(url);
@@ -81,14 +80,14 @@ import { storage } from "./storageManager.js";
 	// Prefill from storage
 	if (storage.get("autoFill") === "true") {
 		steamIdInput.value = storage.get("steamId") || "";
-		apiKeyInput.value = storage.get("apiKey") || "";
+		apiKeyInput.value = storage.get("steamApiKey") || "";
 		autoFillCheckbox.checked = true;
 	}
 
 	if (storage.get("autoLogin") === "true") {
 		autoLoginCheckbox.checked = true;
 		disableSubmit();
-		validateAndRedirect(storage.get("steamId") || "", storage.get("apiKey") || "");
+		validateAndRedirect(storage.get("steamId") || "", storage.get("steamApiKey") || "");
 	}
 
 	loginForm.addEventListener("submit", async (e) => {
@@ -108,8 +107,8 @@ import { storage } from "./storageManager.js";
 		if (!success) return;
 
 		autoFillCheckbox.checked
-			? (storage.set("autoFill", "true"), storage.set("steamId", steamId), storage.set("apiKey", apiKey))
-			: ["autoFill", "steamId", "apiKey"].forEach(k => storage.remove(k));
+			? (storage.set("autoFill", "true"), storage.set("steamId", steamId), storage.set("steamApiKey", apiKey))
+			: ["autoFill", "steamId", "steamApiKey"].forEach(k => storage.remove(k));
 
 		autoLoginCheckbox.checked
 			? storage.set("autoLogin", "true")
