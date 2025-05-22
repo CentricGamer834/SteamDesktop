@@ -353,7 +353,7 @@ function createGameCard(game, index, rankedIds) {
 		} else {
 			const badge = card.querySelector(".badge");
 			if (badge) badge.remove();
-		}
+		} 
 	})
 
 	if (settings.get("showBadges") === true) {
@@ -480,7 +480,7 @@ function initAppSettings() {
 		if (!el) return;
 
 		if (el.type === "checkbox") {
-			el.addEventListener("change", () => settings.set(key, el.checked));
+			el.addEventListener("change", () => settings.set(key, el?.checked || null));
 		} else {
 			el.addEventListener("change", () => settings.set(key, el.value));
 		}
