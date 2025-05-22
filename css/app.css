@@ -57,8 +57,9 @@ img {
     display: none !important;
 }
 
-/** Custom Scrollbar **/
-
+/**
+    Custom Scrollbar
+**/
 ::-webkit-scrollbar {
     height: 12px;
     width: 14px;
@@ -92,6 +93,9 @@ img {
 ::-webkit-scrollbar-corner {
     background: #202020;
 }
+/**
+    Custom Scrollbar
+**/
 
 *,
 *::before,
@@ -138,6 +142,9 @@ img {
 }
 
 
+/**
+    App
+**/
 .app-container {
     color: #d3d3d3;
     height: 100%;
@@ -234,56 +241,13 @@ img {
     }
 }
 
+/**
+    App
+**/
 
-/* 
-.controls-topbar {
-}
-
-.controls-topbar .button {
-    flex-shrink: 0;
-    white-space: nowrap;
-    padding: 8px 16px;
-    font-size: 14px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.user-details {
-    display: flex;
-    flex-direction: column;
-}
-
-#user-avatar {
-    width: 36px;
-    height: 36px;
-    object-fit: cover;
-}
-
-#user-name,
-#user-id {
-    user-select: all;
-}
-
-#user-name {
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.user-actions {
-    display: flex;
-    gap: 12px;
-} */
-
-
-
-/** Game Cards */
+/**
+    Game Cards
+*/
 #games {
     display: grid;
     width: 100%;
@@ -320,14 +284,6 @@ img {
 }
 
 
-.game-card::before {
-    content: "";
-    position: absolute;
-    top: -6px;
-    bottom: -6px;
-    width: 100%
-}
-
 .game-card:active {
     transition-duration: .05s;
     filter: brightness(1.2)
@@ -363,24 +319,12 @@ img {
     overflow-clip-margin: content-box
 }
 
-#games.small {
-    grid-template-columns: repeat(auto-fill, 140px);
-    grid-auto-rows: 210px;
-    gap: 16px 8px
-}
-
 @media (max-width:768px) {
     #games {
         grid-template-columns: repeat(auto-fill, 140px);
         grid-auto-rows: 210px;
         gap: 16px 8px
     }
-}
-
-#games.smaller {
-    grid-template-columns: repeat(auto-fill, 100px);
-    grid-auto-rows: 150px;
-    gap: 12px 6px
 }
 
 @media (max-width:480px) {
@@ -391,20 +335,8 @@ img {
     }
 }
 
-#games.tiny {
-    grid-template-columns: repeat(auto-fill, 60px);
-    grid-auto-rows: 90px;
-    gap: 6px 3px
-}
-
-#games.huge {
-    grid-template-columns: repeat(auto-fill, 360px);
-    grid-auto-rows: 540px;
-    gap: 40px 24px
-}
-
 /** Game Badges */
-.badge {
+.game-rank-badge {
     position: absolute;
     top: 6px;
     right: 6px;
@@ -418,20 +350,22 @@ img {
     z-index: 2
 }
 
-.badge.rank-1 {
+.game-rank-badge.rank-1 {
     background: linear-gradient(to right, gold, #fc0);
 }
 
-.badge.rank-2 {
+.game-rank-badge.rank-2 {
     background: linear-gradient(to right, silver, #a9a9a9);
 }
 
-.badge.rank-3 {
+.game-rank-badge.rank-3 {
     background: linear-gradient(to right, #cd7f32, #b87333);
 }
 
-/** Game Popout */
-.popout {
+/**
+    Game Info Popout
+*/
+.game-info-popout {
     opacity: 0;
     position: absolute;
     z-index: 100;
@@ -452,7 +386,7 @@ img {
     -webkit-app-region: no-drag
 }
 
-.popout.show {
+.game-info-popout.show {
     opacity: 1;
     pointer-events: auto
 }
@@ -596,6 +530,9 @@ img {
     border-color: #c15755;
 }
 
+/**
+    Settings Modal
+**/
 .settings-modal {
     position: fixed;
     inset: 0;
@@ -606,7 +543,7 @@ img {
     position: fixed;
     inset: 0;
     background-color: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(8px);
     z-index: 1000;
 }
 
@@ -650,25 +587,63 @@ img {
     border-bottom: 1px solid #2a475e;
 }
 
-.form-group {
-    margin-bottom: 28px;
+.settings-modal-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 8px;
 }
 
+.settings-modal-group.sameline {
+    align-items: center;
+    flex-direction: row;
+    gap: 26px;
+}
 
+/**
+    Settings Modal
+**/
 
+/**
+    Game Card Context Menu
+**/
+.context-menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
 
+.context-menu {
+    position: absolute;
+    z-index: 10000;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 4px 0;
+    min-width: 180px;
+    color: #eee;
+    font-size: 14px;
+    user-select: none
+}
 
+.context-menu-item {
+    padding: 6px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+}
 
+.context-menu-item:hover {
+    background-color: #444;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
+.context-menu-item:active {
+    background-color: #666;
+}
+/**
+    Game Card Context Menu
+**/

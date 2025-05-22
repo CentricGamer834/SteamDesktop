@@ -38,6 +38,7 @@
     <!-- Assets -->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="css/app.css">
+    <script type="module" src="js/app.js"></script>
 </head>
 
 <body>
@@ -58,39 +59,12 @@
         <div class="settings-modal-content">
             <button class="settings-modal-close" id="close-settings">×</button>
             <h2>Settings</h2>
-
             <div id="settings-container"></div>
-
-            <!-- <div class="form-group">
-                <label for="size-options">Tile Size</label>
-                <input type="range" id="size-options" min="100" max="300" value="150">
-            </div> -->
-
-            <!-- <div class="form-group">
-                <label for="sort-options">Sort Type</label>
-                <select id="sort-options">
-                    <option value="playtime" selected default>Sort by Playtime</option>
-                    <option value="recent">Sort by Recently Played</option>
-                    <option value="name">Sort by Name</option>
-                </select>
-            </div>
-
-            <div class="form-group row">
-                <input type="checkbox" id="redirect-to-site">
-                <label for="redirect-to-site">Steam website links (mobile)</label>
-            </div>
-
-            <div class="form-group row">
-                <input type="checkbox" id="show-badges" checked>
-                <label for="show-badges">Show ranking badges</label>
-            </div>
-
-            <div class="form-group row">
-                <input type="checkbox" id="bad-internet">
-                <label for="bad-internet">Lower network usage</label>
-            </div> -->
-
             <label>Version -1.69420-beta</label>
+            <div class="settings-modal-footer">
+                <button class="button safe" id="save-settings">Save</button>
+                <button class="button danger" id="reset-settings">Reset</button>
+            </div>
         </div>
     </div>
 
@@ -112,8 +86,6 @@
 
         <main id="games"></main>
     </div>
-
-    <script src="js/app.js"></script>
 </body>
 
 </html>
