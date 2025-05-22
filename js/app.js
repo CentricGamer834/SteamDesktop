@@ -353,7 +353,7 @@ function createGameCard(game, index, rankedIds) {
 		} else {
 			const badge = card.querySelector(".badge");
 			if (badge) badge.remove();
-		} 
+		}
 	})
 
 	if (settings.get("showBadges") === true) {
@@ -459,32 +459,42 @@ function initAppSettings() {
 	}
 
 	// Render settings inputs
-	container.innerHTML = Object.entries(defaultSettings).map(([key, { label, value, type, options }]) => {
-		let input = `<div class="form-group">
-<label for="${key}">${label}</label>
-`;
+	Object.entries(defaultSettings).forEach(([key, { label, value, type, options }]) => {
+		const formGroup = document.createElement("div");
+		formGroup.className = "form-group";
+
+		const inputLabel = document.createElement("label");
+		inputLabel.setAttribute("for", key);
+		inputLabel.innerText = label;
+		formGroup.appendChild(inputLabel);
+
+		let settingsInput;
+
 		if (type === "select") {
-			input += `<select id="${key}">${options.map(opt => `<option value="${opt.value}" ${opt.value === settings.get(key) ? "selected" : ""}>${opt.label}</option>`).join("")}</select>`;
+			settingsInput = document.createElement("select");
+			settingsInput.innerHTML = options.map(opt => `<option value="${opt.value}" ${opt.value === settings.get(key) ? "selected" : ""}>${opt.label}</option>`).join("");
 		} else if (type === "checkbox") {
-			input += `<input type="checkbox" id="${key}" ${settings.get(key) ? "checked" : ""}>`;
+			settingsInput = document.createElement("input");
+			settingsInput.type = "checkbox";
+			settingsInput.checked = settings.get(key);
 		} else {
-			input += `<input type="text" id="${key}" value="${settings.get(key) || ""}">`;
+			settingsInput = document.createElement("input");
+			settingsInput.type = "text";
+			settingsInput.value = settings.get(key) || "";
 		}
 
-		return `${input}</div>`;
-	}).join("");
+		settingsInput.id = key;
 
-	// Add event listeners for inputs to update settings state
-	Object.keys(defaultSettings).forEach(key => {
-		const el = $(key);
-		if (!el) return;
-
-		if (el.type === "checkbox") {
-			el.addEventListener("change", () => settings.set(key, el?.checked || null));
+		if (settingsInput.type === "checkbox") {
+			settingsInput.addEventListener("change", () => settings.set(key, settingsInput?.checked || null));
 		} else {
-			el.addEventListener("change", () => settings.set(key, el.value));
+			settingsInput.addEventListener("change", () => settings.set(key, settingsInput?.value));
 		}
+
+		formGroup.appendChild(settingsInput);
+		container.appendChild(formGroup);
 	});
+
 
 	[openSettingsBtn, closeSettingsBtn].forEach(btn => {
 		btn.addEventListener("click", () => {
