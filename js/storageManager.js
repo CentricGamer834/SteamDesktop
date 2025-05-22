@@ -12,6 +12,16 @@ export const storage = (() => {
     }
 
     return {
+        setAll(newState) {
+            Object.assign(state, newState);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            listeners.forEach(({ key: listenKey, cb }, i) => {
+                if (listenKey === null || newState.hasOwnProperty(listenKey)) {
+                    cb(state);
+                    listeners[i].lastValue = state[listenKey];
+                }
+            });
+        },
         getAll() {
             return { ...state };
         },
@@ -46,6 +56,11 @@ export const storage = (() => {
                 }
             });
         },
+        clear() {
+            state = {};
+            localStorage.clear();
+            listeners.forEach(({ cb }) => cb(state));
+        },
         onChange(keySlashCallback, nullableCallback) {
             if (typeof keySlashCallback === "function") {
                 // onChange(callback) - listen to all keys
@@ -64,11 +79,6 @@ export const storage = (() => {
             } else {
                 throw new Error("Invalid arguments to settings.onChange");
             }
-        },
-        clear() {
-            state = {};
-            localStorage.clear();
-            listeners.forEach(({ cb }) => cb(state));
         },
     };
 })();

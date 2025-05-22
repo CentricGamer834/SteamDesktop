@@ -398,40 +398,66 @@ import { storage } from "./storageManager.js";
 			} else if (type === "checkbox") {
 				settingsInput = document.createElement("input");
 				settingsInput.type = "checkbox";
-				settingsInput.checked = storage.get(key) || value || "";
+				settingsInput.checked = storage.get(key) ?? value;
 			} else {
 				settingsInput = document.createElement("input");
 				settingsInput.type = "text";
-				settingsInput.value = storage.get(key) || value || "";
+				settingsInput.value = storage.get(key) ?? value;
 			}
 
 			settingsInput.id = key;
 
 			if (settingsInput.type === "checkbox") {
-				settingsInput.addEventListener("change", () => storage.set(key, settingsInput?.checked || null));
-				// checkbox before label
+				settingsInput.addEventListener("change", () => storage.set(key, settingsInput.checked));
 				formGroup.classList.add("sameline");
 				formGroup.prepend(settingsInput);
 			} else {
-				settingsInput.addEventListener("change", () => storage.set(key, settingsInput?.value));
-				// c
+				settingsInput.addEventListener("change", () => storage.set(key, settingsInput.value));
 				formGroup.appendChild(settingsInput);
 			}
 
+			formGroup.dataset.key = key;
 			container.appendChild(formGroup);
 		});
 
-		// close listeners
-		document.addEventListener("keydown", (e) => settingsModal.hidden = (e.key === "Escape" && !settingsModal.hidden));
-		settingsModalBackdrop.addEventListener("click", () => settingsModal.hidden = true);
+		// Save current settings
+		saveSettingsBtn.addEventListener("click", () => {
+			const settings = Object.keys(dynamicZettings).reduce((acc, key) => {
+				acc[key] = storage.get(key);
+				return acc;
+			}, {});
+			storage.setAll(settings);
+			settingsModal.hidden = true;
+		});
 
+		// Reset to default settings
+		resetSettingsBtn.addEventListener("click", () => {
+			Object.entries(dynamicZettings).forEach(([key, { value }]) => {
+				storage.set(key, value);
+				const input = container.querySelector(`#${key}`);
+				if (input) {
+					if (input.type === "checkbox") {
+						input.checked = value;
+					} else {
+						input.value = value;
+					}
+				}
+			});
+		});
+
+		// Close listeners
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Escape" && !settingsModal.hidden) settingsModal.hidden = true;
+		});
+		settingsModalBackdrop.addEventListener("click", () => settingsModal.hidden = true);
 		[openSettingsBtn, closeSettingsBtn].forEach(btn =>
 			btn.addEventListener("click", () => settingsModal.hidden = true)
 		);
 
-		// open listeners
+		// Open settings
 		openSettingsBtn.addEventListener("click", () => settingsModal.removeAttribute("hidden"));
 	}
+
 	// #endregion UI Functions
 
 	// #region Network functions
