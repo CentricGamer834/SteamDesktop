@@ -65,5 +65,10 @@ export const storage = (() => {
                 throw new Error("Invalid arguments to settings.onChange");
             }
         },
+        clear() {
+            state = {};
+            localStorage.clear();
+            listeners.forEach(({ cb }) => cb(state));
+        },
     };
 })();

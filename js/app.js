@@ -41,8 +41,7 @@ import { storage } from "./storageManager.js";
 	};
 
 	const clearSessionAndRedirect = (msg, redirect = "login.html", delay = 3000) => {
-		localStorage.removeItem("steamId");
-		localStorage.removeItem("apiKey");
+		storage.clear();
 		displayError(`An error may have occured, Please login again <br/> ${msg} <br/> Redirecting in ${delay / 1000} seconds...`, true);
 		setTimeout(() => window.location.replace(redirect), delay);
 	};
