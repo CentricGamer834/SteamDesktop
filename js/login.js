@@ -24,19 +24,26 @@
 
 	const disableSubmit = () => {
 		let seconds = 3;
-		submitButton.disabled = true;
-		submitButton.textContent = `Please wait... (${seconds--}s)`;
 
-		setInterval(() => {
-			if (seconds < 0) {
-				clearInterval(this);
+		// Disable button + inputs
+		submitButton.disabled = true;
+		steamIdInput.disabled = true;
+		apiKeyInput.disabled = true;
+
+		const countdown = () => {
+			if (seconds <= 0) {
 				submitButton.disabled = false;
+				steamIdInput.disabled = false;
+				apiKeyInput.disabled = false;
 				submitButton.textContent = "Sign In";
 			} else {
 				submitButton.textContent = `Please wait... (${seconds--}s)`;
+				setTimeout(countdown, 1000);
 			}
-		}, 1000);
-	}
+		};
+
+		countdown();
+	};
 
 	const validateAndRedirect = async (steamId, apiKey) => {
 		if (!steamId) throw new Error("Steam ID is required");

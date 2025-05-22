@@ -4,7 +4,7 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#1a1a1a",
-    "theme_color": "#1a1a1a",
+    "theme_color": "#1b2838",
     "description": "View your Steam games on your desktop",
     "icons": [
         {

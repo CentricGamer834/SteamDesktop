@@ -15,7 +15,7 @@
     <meta name="robots" content="index, follow">
 
     <!-- PWA/Meta Theme -->
-    <meta name="theme-color" content="#1a1a1a">
+    <meta name="theme-color" content="#1b2838">
     <link rel="manifest" href="app.webmanifest">
     <link rel="apple-touch-icon" sizes="180x180" href="img/icon_478x478.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -38,7 +38,6 @@
     <!-- Assets -->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="css/app.css">
-    <script type="module" src="js/app.js"></script>
 </head>
 
 <body>
@@ -55,25 +54,48 @@
 
     <!-- Settings -->
     <div id="settings-modal" class="modal" hidden>
-        <div class="modal-backdrop"></div>
-        <div class="modal-content">
+        <div class="settings-modal-backdrop" id="settings-modal-backdrop"></div>
+        <div class="settings-modal-content">
+            <button class="settings-modal-close" id="close-settings">×</button>
             <h2>Settings</h2>
-            <label class="select-label" for="size-options">Tile Size</label>
-            <input type="range" id="size-options" min="100" max="300" value="150">
 
-            <div class="labeled-select">
-                <label class="select-label" for="sort-options">Sort Type</label>
+            <div id="settings-container"></div>
+
+            <!-- <div class="form-group">
+                <label for="size-options">Tile Size</label>
+                <input type="range" id="size-options" min="100" max="300" value="150">
+            </div> -->
+
+            <!-- <div class="form-group">
+                <label for="sort-options">Sort Type</label>
                 <select id="sort-options">
-                    <option value="playtime">Sort by Playtime</option>
-                    <option value="name">Sort by Name</option>
+                    <option value="playtime" selected default>Sort by Playtime</option>
                     <option value="recent">Sort by Recently Played</option>
+                    <option value="name">Sort by Name</option>
                 </select>
             </div>
+
+            <div class="form-group row">
+                <input type="checkbox" id="redirect-to-site">
+                <label for="redirect-to-site">Steam website links (mobile)</label>
+            </div>
+
+            <div class="form-group row">
+                <input type="checkbox" id="show-badges" checked>
+                <label for="show-badges">Show ranking badges</label>
+            </div>
+
+            <div class="form-group row">
+                <input type="checkbox" id="bad-internet">
+                <label for="bad-internet">Lower network usage</label>
+            </div> -->
+
+            <label>Version -1.69420-beta</label>
         </div>
     </div>
 
     <!-- Main -->
-    <div class="app-container" >
+    <div class="app-container">
         <div class="controls-topbar">
             <div class="user-info">
                 <img alt="User Avatar" src="img/defaultuserimage.png" id="user-avatar">
@@ -83,11 +105,6 @@
                 </div>
             </div>
             <nav class="user-actions">
-                <div class="input-group row">
-                    <input type="checkbox" class="labeled" id="redirect-to-site">
-                    <label for="redirect-to-site" class="label">Steam website links (mobile)</label>
-                </div>
-
                 <button class="button" id="settings-button">Settings</button>
                 <button class="button danger" id="logout-button">Logout</button>
             </nav>
@@ -95,6 +112,8 @@
 
         <main id="games"></main>
     </div>
+
+    <script src="js/app.js"></script>
 </body>
 
 </html>
