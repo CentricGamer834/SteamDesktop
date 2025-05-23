@@ -1,3 +1,14 @@
+class NetworkError extends Error {
+    constructor(message, info) {
+        super(message);
+        this.name = "NetworkError";
+        this.status = info?.status || 0;
+        this.statusText = info?.statusText || "";
+        this.isNetworkError = info?.isNetworkError || false;
+        this.content = info?.content || null;
+    }
+}
+
 export const network = (() => {
     const PROXY_URL = "https://corsproxy.io/";
 
@@ -72,8 +83,8 @@ export const network = (() => {
             if (!appid) throw new Error("Missing appid for app details request.");
             const url = proxifyUrl(`https://store.steampowered.com/api/appdetails?appids=${appid}`);
             const data = await fetchJson(url);
-            if (!data[appid]?.success) throw new Error(`App details fetch failed for appid ${appid}.`);
-            return data[appid].data;
+            if (!data.content[appid]?.success) throw new Error(`App details fetch failed for appid ${appid}.`);
+            return data.content[appid].data;
         },
 
         async fetchOwnedGames(steamUserId, steamApiKey, includePlayedFreeGames = true, includeAppInfo = true) {
@@ -89,9 +100,7 @@ export const network = (() => {
             if (!steamUserId || !steamApiKey) throw new Error("Missing Steam credentials.");
             const url = proxifyUrl(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${steamApiKey}&steamids=${steamUserId}`);
             const data = await fetchJson(url);
-            const players = data.response?.players?.[0];
-            if (!Array.isArray(players) || !players.length) throw new Error("User details not found.");
-            return players;
+            return data?.content?.response?.players[0];
         }
     };
 })();

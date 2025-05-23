@@ -6,7 +6,7 @@ import { renderer } from "./renderManager.js";
 (() => {
 	const $ = renderer.$;
 	let steamApiKey = storage.get("steamApiKey");
-	let steamUserId = storage.get("steamUserId");
+	let steamUserId = storage.get("steamId");
 
 	// #region DOM Elements
 	const loadingScreen = $("loading-screen");
@@ -122,7 +122,7 @@ import { renderer } from "./renderManager.js";
     </div>
 </div>`;
 			document.body.appendChild(popout);
-			renderer.attachFloaterToParent(card, popout);
+			renderer.clampElmToParent(card, popout);
 			popout.classList.add("show");
 			if (screenshots?.length) startCarousel(screenshots);
 		};
@@ -154,27 +154,27 @@ import { renderer } from "./renderManager.js";
 		});
 	}
 
-	function createGameCard(data, index, rankedIds) {
+	function createGameCard(gameData, index, rankedIds) {
 		const gameCard = document.createElement("section");
 		gameCard.className = "game-card";
 		gameCard.setAttribute("role", "link");
 		gameCard.onclick = () => {
 			// TODO
 			if (storage.get("redirectToSite")) {
-				window.open(`https://store.steampowered.com/app/${data.appid}`, "_blank");
+				window.open(`https://store.steampowered.com/app/${gameData.appid}`, "_blank");
 			} else {
-				window.open(`steam://rungameid/${data.appid}`, "_blank");
+				window.open(`steam://rungameid/${gameData.appid}`, "_blank");
 			}
 		}
 
 		const coverImg = new Image();
 		coverImg.className = "cover-image";
-		coverImg.alt = data.name || `${data.name} cover image`;
+		coverImg.alt = gameData.name || `${gameData.name} cover image`;
 
 		const fallbackImages = [
-			`https://steamcdn-a.akamaihd.net/steam/apps/${data.appid}/library_600x900_2x.jpg`,
-			`https://shared.steamstatic.com/store_item_assets/steam/apps/${data.appid}/library_600x900.jpg`,
-			`https://shared.steamstatic.com/store_item_assets/steam/apps/${data.appid}/portrait.png`
+			`https://steamcdn-a.akamaihd.net/steam/apps/${gameData.appid}/library_600x900_2x.jpg`,
+			`https://shared.steamstatic.com/store_item_assets/steam/apps/${gameData.appid}/library_600x900.jpg`,
+			`https://shared.steamstatic.com/store_item_assets/steam/apps/${gameData.appid}/portrait.png`
 		];
 
 		let fallbackIndex = 0;
@@ -186,7 +186,7 @@ import { renderer } from "./renderManager.js";
 
 				const fallbackText = document.createElement("div");
 				fallbackText.className = "fallback-text";
-				fallbackText.textContent = data.name || "Unknown Game";
+				fallbackText.textContent = gameData.name || "Unknown Game";
 				gameCard.appendChild(fallbackText);
 			}
 		};
@@ -218,8 +218,8 @@ import { renderer } from "./renderManager.js";
 
 		// Show badges if enabled
 		if (storage.get("showBadges") === true) {
-			if (rankedIds.includes(data.appid)) {
-				const rank = rankedIds.indexOf(data.appid) + 1;
+			if (rankedIds.includes(gameData.appid)) {
+				const rank = rankedIds.indexOf(gameData.appid) + 1;
 				const badge = document.createElement("div");
 				badge.className = `game-rank-badge rank-${rank}`;
 				badge.innerText = rank;
@@ -228,14 +228,16 @@ import { renderer } from "./renderManager.js";
 		}
 
 		// functionality triggers
-		setupGamePopoutTrigger(gameCard, data, index);
-		renderer.setupCtxMenu(gameCard, [
-			{ label: "Play", url: `steam://rungameid/${gameData.appid}` },
-			{ label: "View on Steam", url: `https://store.steampowered.com/app/${gameData.appid}` },
-			{ label: "View News", url: `https://store.steampowered.com/app/${gameData.appid}/news/` },
-			{ label: "View Screenshots", url: `https://store.steampowered.com/app/${gameData.appid}/screenshots/` },
-			{ label: "View Videos", url: `https://store.steampowered.com/app/${gameData.appid}/videos/` }
-		]);
+		setupGamePopoutTrigger(gameCard, gameData, index);
+
+		// THOS IS THE ERRORING CODE ILL FIX IT G
+		// renderer.setupCtxMenu(gameCard, [
+		// 	{ label: "Play", url: `steam://rungameid/${gameData.appid}` },
+		// 	{ label: "View on Steam", url: `https://store.steampowered.com/app/${gameData.appid}` },
+		// 	{ label: "View News", url: `https://store.steampowered.com/app/${gameData.appid}/news/` },
+		// 	{ label: "View Screenshots", url: `https://store.steampowered.com/app/${gameData.appid}/screenshots/` },
+		// 	{ label: "View Videos", url: `https://store.steampowered.com/app/${gameData.appid}/videos/` }
+		// ]);
 
 		return gameCard;
 	}
@@ -442,21 +444,28 @@ import { renderer } from "./renderManager.js";
 				steamApiKey,
 				storage.get("includeFreeGames")
 			);
+			console.log(games)
 
 			renderAppSettings();
 			sortAndRankThenRenderGames(games);
 			renderUserDetails();
 		} catch (e) {
-			if (/missing|invalid/i.test(e.message))
-				clearDataLogout("Invalid Steam ID or API Key. Please log in again.")
-			else
-				showError("Load error: " + e.message);
+			// if (/missing|invalid/i.test(e.message))
+			// 	clearDataLogout("Invalid Steam ID or API Key. Please log in again.")
+			// else
+			// 	showError("Load error: " + e.message);
 		} finally {
 			hideLoading();
 		}
 	}
 
 	logoutBtn.addEventListener("click", () => clearDataLogout("Logging out...", true));
-	document.addEventListener("DOMContentLoaded", loadAndRender);
+
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", loadAndRender);
+	} else {
+		loadAndRender();
+	}
 	// #endregion INIT
 })();

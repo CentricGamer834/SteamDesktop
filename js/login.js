@@ -48,11 +48,12 @@ import $ from "./renderManager.js";
 		if (!isValidApiKey(steamApiKey)) throw new Error("Invalid API Key (32-char hex)");
 
 		try {
-			// Await the call and capture result to avoid unused variable
 			await network.fetchOwnedGames(steamId, steamApiKey, false, false);
 			window.location.replace("app.html");
+			return true;
 		} catch (err) {
 			showError(network.translateHttpError(err.message));
+			return false;
 		}
 	};
 
