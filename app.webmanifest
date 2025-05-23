@@ -11,6 +11,14 @@
     "dir": "ltr",
     "theme_color": "#1b2838",
     "background_color": "#1b2838",
+    "display_override": [
+        "window-controls-overlay",
+        "standalone",
+        "fullscreen"
+    ],
+    "window_controls_overlay": {
+        "enabled": true
+    },
     "icons": [
         {
             "src": "img/icon_48x48.png",
