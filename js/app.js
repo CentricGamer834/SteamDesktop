@@ -1,14 +1,14 @@
+// Development
 import { storage } from "./storageManager.js";
+import { network } from "./networkManager.js";
+import { renderer } from "./renderManager.js";
 
 (() => {
-	// Development
-	// TODO: proxy stuff
-	const PROXY_URL = "https://corsproxy.io/?";
-	const steamUserId = storage.get("steamId");
-	const steamApiKey = storage.get("steamApiKey");
+	const $ = renderer.$;
+	let steamApiKey = storage.get("steamApiKey");
+	let steamUserId = storage.get("steamUserId");
 
 	// #region DOM Elements
-	const $ = (id) => document.getElementById(id);
 	const loadingScreen = $("loading-screen");
 	const errorScreen = $("error-screen");
 	const gamesContainer = $("games");
@@ -25,114 +25,46 @@ import { storage } from "./storageManager.js";
 	// #region UI Functions
 	const showLoading = () => loadingScreen.hidden = false;
 	const hideLoading = () => loadingScreen.hidden = true;
-
-	const displayError = (message, isFatal = true) => {
+	const showError = (message, isFatal = true) => {
 		const errorScreenMsg = $("error-screen-message");
-		errorScreenMsg.textContent = ""; // clear previous error
+		errorScreenMsg.textContent = "";
 
 		const header = document.createElement("p");
-		header.innerHTML = `${isFatal ? "A fatal error has occurred!" : "An error has occurred!"}<br/>${message}`;
+		header.innerHTML = `
+		<strong>${isFatal ? "A fatal error occurred!" : "An error occurred!"}</strong><br/><br/>
+		${message}<br/><br/>
+		${isFatal ? "You may need to log in again." : "You can try refreshing the page."}`;
 
-		const actionLink = document.createElement("a");
-		actionLink.textContent = isFatal ? "Login again" : "Refresh page";
-		actionLink.onclick = isFatal
-			? () => clearSessionAndRedirect(message)
-			: () => location.reload();
+		const loginBtn = document.createElement("a");
+		loginBtn.textContent = "Log in again";
+		loginBtn.onclick = () => clearDataLogout();
+
+		const refreshBtn = document.createElement("a");
+		refreshBtn.textContent = "Refresh page";
+		refreshBtn.onclick = () => location.reload();
 
 		const errorActions = document.createElement("div");
 		errorActions.className = "error-actions";
-		errorActions.appendChild(actionLink);
+		errorActions.append(loginBtn, refreshBtn);
 
-		errorScreenMsg.appendChild(header);
-		errorScreenMsg.appendChild(errorActions);
+		errorScreenMsg.append(header, errorActions);
 
 		errorScreen.hidden = false;
 		hideLoading();
 	};
 
-	const clearSessionAndRedirect = (msg, redirect = "login.html", delay = 3000) => {
+	const clearDataLogout = (msg = "Session expired. Logging out...", noErr) => {
+		const delay = 3000;
+
+		if (!noErr) {
+			console.warn(msg);
+			showError(`Redirecting to login in ${delay / 1000} seconds...`, true);
+		}
+
 		storage.clear();
-		displayError(`Redirecting to login in ${delay / 1000} seconds...`, true);
-		setTimeout(() => window.location.replace(redirect), delay);
+		setTimeout(() => window.location.replace("login.html"), delay);
 	};
 
-	function attachFloaterToParent(parent, popout) {
-		const { scrollX, scrollY } = window;
-		const rect = parent.getBoundingClientRect();
-		const pRect = popout.getBoundingClientRect();
-		let left = rect.right + scrollX + 15;
-		let top = rect.top + scrollY;
-
-		if (left + pRect.width > document.body.scrollWidth + scrollX) {
-			left = rect.left - pRect.width + scrollX - 15;
-		}
-		if (top + pRect.height > document.body.scrollHeight + scrollY) {
-			top = rect.bottom - pRect.height + scrollY;
-		}
-
-		popout.style.left = `${Math.max(scrollX, left)}px`;
-		popout.style.top = `${Math.max(scrollY, top)}px`;
-		return popout;
-	}
-
-	function setupGameCtxMenuTrigger(gameCard, gameData, creationData = []) {
-		const ctxMenuBackdrop = document.createElement("div");
-		ctxMenuBackdrop.className = "context-menu-backdrop";
-
-		const ctxMenu = document.createElement("div");
-		ctxMenu.className = "context-menu";
-
-		creationData = Object.assign(creationData, [
-			{ label: "Play", url: `steam://rungameid/${gameData.appid}` },
-			{ label: "View on Steam", url: `https://store.steampowered.com/app/${gameData.appid}` },
-			{ label: "View News", url: `https://store.steampowered.com/app/${gameData.appid}/news/` },
-			{ label: "View Screenshots", url: `https://store.steampowered.com/app/${gameData.appid}/screenshots/` },
-			{ label: "View Videos", url: `https://store.steampowered.com/app/${gameData.appid}/videos/` },
-		]);
-
-		creationData.forEach(({ label, url }) => {
-			const item = document.createElement("div");
-			item.className = "context-menu-item";
-			item.textContent = label;
-
-			item.addEventListener("click", () => {
-				window.open(url, "_blank");
-				hideMenu();
-			});
-
-			ctxMenu.appendChild(item);
-		});
-
-		const showMenu = () => {
-			document.body.append(ctxMenuBackdrop, ctxMenu);
-			attachFloaterToParent(gameCard, ctxMenu);
-		};
-
-		const hideMenu = () => {
-			ctxMenu.remove();
-			ctxMenuBackdrop.remove();
-		};
-
-		gameCard.addEventListener("contextmenu", (e) => {
-			e.preventDefault();
-			showMenu();
-		});
-
-		document.addEventListener("click", (e) => {
-			if (!ctxMenu.contains(e.target)) {
-				hideMenu();
-			}
-		});
-
-		ctxMenuBackdrop.addEventListener("click", () => {
-			hideMenu();
-		});
-
-		window.addEventListener("scroll", hideMenu);
-		window.addEventListener("resize", hideMenu);
-		window.addEventListener("mouseleave", hideMenu);
-		window.addEventListener("blur", hideMenu);
-	}
 
 	function setupGamePopoutTrigger(card, game, rankIndex) {
 		let popout = null;
@@ -165,7 +97,7 @@ import { storage } from "./storageManager.js";
 			const {
 				header_image,
 				screenshots
-			} = await fetchAppDetails(appid);
+			} = await network.fetchAppDetails(appid);
 
 			const lastPlayedTimestamp = parseInt(rtime_last_played, 10);
 			const recentPlayMinutes = (playtime_2weeks || 0);
@@ -183,14 +115,14 @@ import { storage } from "./storageManager.js";
 <div class="popout-stats-wrapper">
     <div class="popout-stats">
         <div class="popout-time-played">Time played</div>
+        <div>Total: ${totalHoursPlayed + "hrs"} | ${playtime_forever + "min"}</div>
         <div>Last two weeks: ${recentPlayMinutes} min</div>
-        <div>Total: ${totalHoursPlayed ? totalHoursPlayed + "hrs" : "Unknown"} | ${playtime_forever ? playtime_forever + "min" : "Unknown"}</div>
-        <div>${storage.get("sortType") ? (storage.get("sortType")[0].toUpperCase() + storage.get("sortType").slice(1)) : "Sort Type"} ranking: ${(rankIndex + 1) ? "#" + (rankIndex + 1) : "Unknown"}</div>
         <div>Last played: ${lastPlayedDate ? lastPlayedDate : "Unknown"}</div>
+        <div>${storage.get("sortType") ? (storage.get("sortType")[0].toUpperCase() + storage.get("sortType").slice(1)) : "Sort Type"} ranking: ${(rankIndex + 1) ? "#" + (rankIndex + 1) : "Unknown"}</div>
     </div>
 </div>`;
 			document.body.appendChild(popout);
-			attachFloaterToParent(card, popout);
+			renderer.attachFloaterToParent(card, popout);
 			popout.classList.add("show");
 			if (screenshots?.length) startCarousel(screenshots);
 		};
@@ -263,12 +195,15 @@ import { storage } from "./storageManager.js";
 		if (storage.get("badInterwebs") === true) {
 			coverImg.loading = "lazy";
 			coverImg.dataset.src = fallbackImages[0];
+			gameCard.style.cssText = "visibility: hidden; opacity: 0; transition: opacity 2s ease-in-out;";
 
 			const observer = new IntersectionObserver((entries, obs) => {
 				entries.forEach(entry => {
 					if (entry.isIntersecting) {
 						const img = entry.target;
 						img.src = img.dataset.src;
+						gameCard.style.cssText = "visibility: visible; opacity: 1;";
+
 						obs.unobserve(img);
 					}
 				});
@@ -294,7 +229,13 @@ import { storage } from "./storageManager.js";
 
 		// functionality triggers
 		setupGamePopoutTrigger(gameCard, data, index);
-		setupGameCtxMenuTrigger(gameCard, data);
+		renderer.setupCtxMenu(gameCard, [
+			{ label: "Play", url: `steam://rungameid/${gameData.appid}` },
+			{ label: "View on Steam", url: `https://store.steampowered.com/app/${gameData.appid}` },
+			{ label: "View News", url: `https://store.steampowered.com/app/${gameData.appid}/news/` },
+			{ label: "View Screenshots", url: `https://store.steampowered.com/app/${gameData.appid}/screenshots/` },
+			{ label: "View Videos", url: `https://store.steampowered.com/app/${gameData.appid}/videos/` }
+		]);
 
 		return gameCard;
 	}
@@ -321,19 +262,14 @@ import { storage } from "./storageManager.js";
 	}
 
 	async function renderUserDetails() {
-		const {
-			avatarmedium,
-			personaname,
-			steamid
-		} = await fetchUserDetails();
+		const { avatarmedium, personaname, steamid } = await network.fetchUserDetails(steamUserId, steamApiKey);
 
 		userAvatar.src = avatarmedium || "img/defaultuserimage.png";
 		userAvatar.onerror = () => {
 			userAvatar.src = "img/defaultuserimage.png";
-		}
+		};
 
 		userName.innerText = personaname || "Unknown User";
-
 		userId.innerText = steamid || "Unknown ID";
 	}
 
@@ -496,65 +432,31 @@ import { storage } from "./storageManager.js";
 
 	// #endregion UI Functions
 
-	// #region Network functions
-	async function fetchJson(url) {
-		try {
-			const res = await fetch(url);
-			if (!res.ok) throw new Error(`HTTP error: ${res.status} ${res.statusText}`);
-			return await res.json();
-		} catch (err) {
-			console.error("fetchJson error:", err);
-			throw new Error(`Network or fetch error: ${err.message}`);
-		}
-	}
-
-	async function fetchOwnedGames(include_played_free_games = true) {
-		if (!steamUserId || !steamApiKey) throw new Error("Missing Steam credentials.");
-		const url = `${PROXY_URL}https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamUserId}&include_appinfo=1&include_played_free_games=${include_played_free_games ? "1" : "0"}&format=json`;
-		const data = await fetchJson(url);
-		if (!data?.response?.games?.length) throw new Error("No games found.");
-		return data.response.games || {};
-	}
-
-	async function fetchAppDetails(appId) {
-		const url = `${PROXY_URL}https://store.steampowered.com/api/appdetails?appids=${appId}`;
-		const data = await fetchJson(url);
-		return data?.[appId]?.data || {};
-	}
-
-	async function fetchUserDetails() {
-		const url = `${PROXY_URL}https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${steamApiKey}&steamids=${steamUserId}`;
-		const data = await fetchJson(url);
-		return data.response.players?.[0] || {};
-	}
-	// #endregion Network functions
-
 	// #region INIT
 	async function loadAndRender() {
 		showLoading();
 
 		try {
-			const games = await fetchOwnedGames(
+			const games = await network.fetchOwnedGames(
+				steamUserId,
+				steamApiKey,
 				storage.get("includeFreeGames")
 			);
-
-			if (!games.length) return clearSessionAndRedirect("No games found.");
-			logoutBtn.onclick = () => clearSessionAndRedirect("Logging out...", "login.html", 500);
 
 			renderAppSettings();
 			sortAndRankThenRenderGames(games);
 			renderUserDetails();
 		} catch (e) {
 			if (/missing|invalid/i.test(e.message))
-				clearSessionAndRedirect("Invalid Steam ID or API Key. Please log in again.")
+				clearDataLogout("Invalid Steam ID or API Key. Please log in again.")
 			else
-				displayError("Load error: " + e.message);
+				showError("Load error: " + e.message);
 		} finally {
 			hideLoading();
 		}
 	}
 
-
+	logoutBtn.addEventListener("click", () => clearDataLogout("Logging out...", true));
 	document.addEventListener("DOMContentLoaded", loadAndRender);
 	// #endregion INIT
 })();

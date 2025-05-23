@@ -1,15 +1,30 @@
 {
     "name": "SteamDesktop",
     "short_name": "SteamDesktop",
-    "start_url": ".",
-    "display": "standalone",
-    "background_color": "#1a1a1a",
-    "theme_color": "#1b2838",
     "description": "View your Steam games on your desktop",
+    "start_url": "/index.html",
+    "display": "fullscreen",
+    "scope": "/",
+    "lang": "en",
+    "id": "steamdesktop",
+    "orientation": "any",
+    "dir": "ltr",
+    "theme_color": "#1b2838",
+    "background_color": "#1b2838",
     "icons": [
         {
-            "src": "img/icon_478x478.png",
-            "sizes": "478x478",
+            "src": "img/icon_48x48.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        },
+        {
+            "src": "img/icon_192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "img/icon_512x512.png",
+            "sizes": "512x512",
             "type": "image/png"
         }
     ]

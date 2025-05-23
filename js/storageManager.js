@@ -1,5 +1,4 @@
 const STORAGE_KEY = "steamSettings";
-
 export const storage = (() => {
     let state = {};
     const listeners = [];

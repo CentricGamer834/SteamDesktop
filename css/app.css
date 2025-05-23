@@ -532,14 +532,32 @@ img {
     color: #fff;
 }
 
+.button.safe {
+    background-color: #2e743d;
+    border-color: #169130;
+}
+
 .button.danger {
     background-color: #c15755;
-    border-color: #ce403e;
+    border-color: #a94442;
 }
 
 .button.danger:hover {
-    background-color: #ce403e;
-    border-color: #c15755;
+    background-color: #a94442;
+}
+
+.button.danger:active {
+    background-color: #892726;
+    color: #fff;
+}
+
+.button.safe:hover {
+    background-color: #256636;
+}
+
+.button.safe:active {
+    background-color: #1c4f27;
+    color: #fff;
 }
 
 /**
@@ -586,6 +604,12 @@ img {
     cursor: pointer;
     transition: color 0.2s ease;
     line-height: 1;
+}
+
+.settings-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 .settings-modal-close:hover {
