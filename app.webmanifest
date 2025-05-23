@@ -3,6 +3,8 @@
     "short_name": "SteamDesktop",
     "description": "View your Steam games on your desktop",
     "display": "fullscreen",
+    "start_url": "/SteamDesktop/app.html",
+    "scope": "/SteamDesktop/",
     "lang": "en",
     "id": "steamdesktop",
     "orientation": "any",
