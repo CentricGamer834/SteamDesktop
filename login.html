@@ -46,26 +46,25 @@
 <body>
     <main class="login-screen">
         <form id="login-form">
-            <div class="input-wrapper">
+            <div class="form-group">
                 <label for="apiKey" class="input-label">Steam API Key</label>
-                <input type="text" id="apiKey" class="cred-input" placeholder="Steam API Key Here" required
-                    autocapitalize="off" autocorrect="off" spellcheck="false" minlength="32" maxlength="32"
-                    inputmode="text" placeholder="Steam API Key Here">
+                <input type="text" id="apiKey" class="cred-input" required autocapitalize="off" autocorrect="off"
+                    spellcheck="false" minlength="32" maxlength="32" inputmode="text" placeholder="Steam API Key Here">
             </div>
-            <div class="input-wrapper">
+            <div class="form-group">
                 <label for="accountId" class="input-label">Steam User ID (64-bit)</label>
-                <input type="text" id="accountId" class="cred-input" placeholder="Steam User ID 64 Here" required
-                    autocapitalize="off" autocorrect="off" spellcheck="false" minlength="17" maxlength="17"
-                    inputmode="numeric" pattern="\d{17}" placeholder="Steam User ID 64 Here">
+                <input type="text" id="accountId" class="cred-input" required autocapitalize="off" autocorrect="off"
+                    spellcheck="false" minlength="17" maxlength="17" inputmode="numeric" pattern="\d{17}"
+                    placeholder="Steam User ID 64 Here">
             </div>
-            <div class="input-wrapper row">
+            <div class="form-group sameline">
                 <input type="checkbox" class="input" id="auto-fill">
                 <label for="auto-fill" class="input-label">Auto fill</label>
                 <input type="checkbox" class="input" id="auto-login">
                 <label for="auto-login" class="input-label">Auto login</label>
             </div>
             <div class="button-container">
-                <button type="submit" id="submit">Sign in</button>
+                <button type="submit" id="login">Sign in</button>
                 <a href="https://google.com/search?q=Where+can+I+find+my+steam+API+Key+and+my+Steam+user+account+ID"
                     target="_blank" rel="noopener noreferrer">Help, I can't sign in</a>
             </div>

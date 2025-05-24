@@ -2,25 +2,29 @@ html,
 body {
     margin: 0;
     padding: 0;
-    height: 100%;
     width: 100%;
+    height: 100%;
     overflow: hidden;
     color: #e0e0e0;
     font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
-    background: #1b2838 url(../img/cluster_bg.png) no-repeat bottom center;
+    background:
+        radial-gradient(rgba(24, 26, 33, 0) 0, #181a21 100%) 0 0 / cover no-repeat fixed,
+        url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top / cover no-repeat,
+        #1b2838;
     user-select: none;
     box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
 }
 
 div:focus,
 a:focus,
 span:focus {
     outline: none;
-}
-
-input[type="range"] {
-    width: 100%;
-    accent-color: #66c0f4;
 }
 
 label {
@@ -41,6 +45,7 @@ select {
     font-size: 14px;
     appearance: none;
 }
+
 
 a {
     width: fit-content;
@@ -103,14 +108,8 @@ img {
     Custom Scrollbar
 **/
 
-*,
-*::before,
-*::after {
-    box-sizing: inherit;
-}
-
 /** Error Screen, Loading Screen */
-#error-screen p {
+#error-screen {
     color: #ed1818;
     font-size: 1rem;
 }
@@ -125,28 +124,14 @@ img {
     align-items: center;
     text-align: center;
     color: #eae8e8;
-    background: radial-gradient(rgba(24, 26, 33, 0) 0%, #181a21 100%) fixed no-repeat,
-        url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top no-repeat,
-        #181a21;
     background-size: cover;
     visibility: visible;
 }
 
 .overlay-screen img {
-    -webkit-user-drag: none;
-    -webkit-app-region: no-drag;
-    pointer-events: none;
     width: 100px;
     height: 100px;
 }
-
-.overlay-screen p {
-    font-size: 12px;
-    text-transform: uppercase;
-    margin-top: 8px;
-    font-weight: 500
-}
-
 
 /**
     App
@@ -159,15 +144,42 @@ img {
 }
 
 .controls-topbar {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     gap: 0.75rem;
-    border-bottom: 2px solid #2a475e;
     padding: 10px 20px;
     background-color: #171a21;
+    /* box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.7); */
+}
+
+.controls-topbar::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(270deg, #1f2733, #66c0f4, #1f2733);
+    background-size: 1000%;
+    animation: pulsingGradient 10s ease infinite;
+}
+
+@keyframes pulsingGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .controls-topbar #game-search {
@@ -177,7 +189,10 @@ img {
     background: #2a475e;
     border: none;
     color: #fff;
-    border-radius: 2px;
+}
+
+.controls-topbar #game-search::placeholder {
+    color: #dcddde;
 }
 
 .account-details {
@@ -355,6 +370,38 @@ img {
         gap: 12px 6px
     }
 }
+
+/** js controlled sizes */
+.size-default {
+    grid-template-columns: repeat(auto-fill, 222px) !important;
+    grid-auto-rows: 333px !important;
+}
+
+.size-x-large {
+    grid-template-columns: repeat(auto-fill, 296px) !important;
+    grid-auto-rows: 444px !important;
+}
+
+.size-large {
+    grid-template-columns: repeat(auto-fill, 259px) !important;
+    grid-auto-rows: 388px !important;
+}
+
+.size-medium {
+    grid-template-columns: repeat(auto-fill, 207px) !important;
+    grid-auto-rows: 311px !important;
+}
+
+.size-small {
+    grid-template-columns: repeat(auto-fill, 170px) !important;
+    grid-auto-rows: 255px !important;
+}
+
+.size-x-small {
+    grid-template-columns: repeat(auto-fill, 133px) !important;
+    grid-auto-rows: 199px !important;
+}
+
 
 /** Game Badges */
 .game-rank-badge {
@@ -570,7 +617,7 @@ img {
 }
 
 /**
-    Settings Modal
+    Settings settings-modal
 **/
 .settings-modal {
     position: fixed;
@@ -604,6 +651,13 @@ img {
     max-height: 90vh;
 }
 
+
+.settings-modal-content h2 {
+    margin: 0 0 15px;
+    font-size: 20px;
+    padding-bottom: 8px;
+}
+
 .settings-modal-close {
     position: absolute;
     top: 12px;
@@ -627,12 +681,6 @@ img {
     color: #66c0f4;
 }
 
-.settings-modal-content h2 {
-    margin: 0 0 15px;
-    font-size: 20px;
-    padding-bottom: 8px;
-}
-
 .settings-modal-group {
     margin-bottom: 12px;
     display: flex;
@@ -647,7 +695,7 @@ img {
     gap: 26px;
 }
 
-.settings-modal-group .settings-divider {
+.settings-modal-item.divider {
     display: flex;
     align-items: center;
     width: 100%;
@@ -655,20 +703,23 @@ img {
     font-size: 14px;
 }
 
-.settings-divider::before,
-.settings-divider::after {
+.settings-modal-item.divider::before,
+.settings-modal-item.divider::after {
     content: "";
     width: 100%;
     height: 1px;
-    margin: 12px;
     background: #2a475e;
     border: none;
     opacity: 0.8;
     flex: 1;
-    margin: 0 12px;
+    margin-top: 22px;
+    margin-bottom: 16px;
+    margin-left: 12px;
+    margin-right: 12px;
 }
 
-.settings-modal-group .settings-text {
+.settings-modal-group .settings-modal-item.text,
+.settings-modal-group .settings-modal-item.password {
     width: 100%;
     padding: 6px 10px;
     background: #2a475e;
@@ -678,7 +729,7 @@ img {
 }
 
 /**
-    Settings Modal
+    Settings settings-modal
 **/
 
 /**
@@ -731,5 +782,102 @@ img {
 }
 
 /**
-    Game Card Context Menu
+    Error Dialog / MessageBox
 **/
+
+.dialog {
+    width: 360px;
+    background: #fff;
+    border: 1px solid #000;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    user-select: none;
+    outline: none;
+}
+
+.dialog-titlebar {
+    background: black;
+    color: white;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    user-select: text;
+}
+
+.dialog-title {
+    line-height: 1.2;
+    padding: 6px 8px;
+}
+
+.dialog-controls {
+    display: flex;
+}
+
+.dialog-close {
+    color: white;
+    font-size: 18px;
+    user-select: none;
+    height: 100%;
+    width: 30px;
+    text-align: center;
+    transition: background-color 0.2s ease;
+}
+
+.dialog-close:hover {
+    background: #E81123;
+}
+
+.dialog-body {
+    display: flex;
+    padding: 20px 20px 16px;
+    gap: 16px;
+    font-weight: 500;
+}
+
+.dialog-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.dialog-icon img {
+    width: 32px;
+    height: 32px;
+}
+
+.dialog-message {
+    flex-grow: 1;
+    font-size: 12px;
+    line-height: 1.3;
+    color: #000;
+    user-select: text;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 9px 12px;
+    border-top: 1px solid #E1E1E1;
+    background-color: #eeeeee;
+    gap: 8px
+}
+
+.dialog-footer button {
+    min-width: 75px;
+    padding: 3px 6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid black;
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: inset -1px -1px 2px 0px black;
+    color: #383838
+}
+
+.dialog-footer button:hover:active {
+    box-shadow: inset 1px 1px 4px -1px black;
+}

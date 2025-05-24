@@ -7,30 +7,42 @@ body {
     overflow: hidden;
     color: #e0e0e0;
     font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
-    background: url(../img/cluster_bg.png) bottom center no-repeat #1b2838;
+    background:
+        radial-gradient(rgba(24, 26, 33, 0) 0, #181a21 100%) 0 0 / cover no-repeat fixed,
+        url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top / cover no-repeat,
+        #1b2838;
     user-select: none;
-    box-sizing: border-box
+    box-sizing: border-box;
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
+/* Links */
 a {
-    width: fit-content;
-    font-family: "Motiva Sans", Sans-serif;
+    font-family: "Motiva Sans", sans-serif;
     cursor: pointer;
-    font-weight: 550;
+    font-weight: 600;
     font-size: 12px;
     color: #afafaf;
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
+
 .login-screen {
-    background: radial-gradient(rgba(24, 26, 33, 0) 0, #181a21 100%) 0 0/cover no-repeat fixed, url(https://community.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg) center top/cover no-repeat, 0 0/cover #1b2838;
     position: fixed;
+    inset: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     color: #eae8e8;
     z-index: 99999;
-    inset: 0
+    padding: 1rem;
 }
 
 #login-form {
@@ -38,110 +50,101 @@ a {
     border-radius: 8px;
     padding: 22px 30px;
     width: 100%;
-    max-width: 450px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .5);
-    display: grid;
-    gap: 16px
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
 }
 
 #login-form.login-error .cred-input {
-    border-color: #c15755
+    border-color: #c15755;
+    box-shadow: 0 0 5px #c15755;
 }
 
 #login-form.login-error #error-display {
     color: #c15755;
     font-size: 12px;
     font-weight: 500;
-    text-align: center
+    text-align: center;
+    user-select: text;
 }
 
-.input-wrapper {
+.form-group {
     display: flex;
     flex-direction: column;
     text-align: left;
-    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
 }
 
-.input-wrapper.row {
+.form-group.sameline {
     flex-direction: row;
     justify-content: center;
+    gap: 8px;
 }
 
-.input-wrapper .input-label {
+.input-label {
     font-size: 12px;
     color: #afafaf;
     text-transform: uppercase;
-    letter-spacing: .02em;
+    letter-spacing: 0.02em;
     user-select: none;
-    margin: 4px 0
+    margin: 4px 0;
 }
 
-.input-wrapper .cred-input {
+.cred-input {
     border-radius: 2px;
     color: #fff;
     padding: 10px;
     background-color: #32353c;
-    outline: 0;
+    outline: none;
     font-size: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.333);
+    border: 1px solid rgba(255, 255, 255, 0.33);
+    transition: border-color 0.2s ease;
+    max-width: 100%;
+    width: 100%;
+    text-overflow: ellipsis;
 }
 
+.cred-input:focus {
+    border-color: #06bfff;
+}
+
+/* Button container and button */
 .button-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px
+    gap: 10px;
 }
 
-.button-container [type=submit]#submit {
+.button-container #login {
     width: 100%;
     max-width: 270px;
-    background: linear-gradient(90deg, #06bfff 0, #2d73ff 100%);
+    background: linear-gradient(90deg, #06bfff 0%, #2d73ff 100%);
     border-radius: 2px;
     border: none;
     padding: 12px;
     color: #fff;
     font-size: 16px;
-    font-weight: 400;
-    cursor: pointer
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    user-select: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
-.button-container [type=submit]#submit[disabled] {
-    opacity: .5;
-    cursor: not-allowed
+.button-container #login:hover:not([disabled]) {
+    background: linear-gradient(90deg, #2d73ff 0%, #06bfff 100%);
 }
 
-@media (max-width: 768px) {
-    #login-form {
-        padding: 1rem;
-        max-width: 90vw;
-    }
-
-    .button-container button {
-        font-size: 0.9rem;
-        padding: 0.65rem;
-    }
+.button-container #login:active:not([disabled]) {
+    background: linear-gradient(90deg, #055ea9 0%, #094f9e 100%);
 }
 
-@media (max-width: 480px) {
-    html, body {
-        font-size: 14px;
-    }
-
-    .login-screen {
-        padding: 2vw;
-    }
-
-    #login-form {
-        padding: 1rem;
-    }
-
-    .cred-input {
-        font-size: 0.95rem;
-    }
-
-    .button-container [type=submit]#submit {
-        font-size: 0.95rem;
-        padding: 0.65rem;
-    }
+.button-container #login[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

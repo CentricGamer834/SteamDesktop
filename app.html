@@ -45,14 +45,29 @@
 
 <body>
     <!-- Screens -->
-    <div id="error-screen" class="overlay-screen" hidden>
-        <img src="img/icon_512x512.png" alt="SteamDesktop Icon">
-        <p id="error-screen-message">An unexpected error occured...</p>
-    </div>
-
     <div id="loading-screen" class="overlay-screen">
         <img src="img/icon_512x512.png" alt="SteamDesktop Icon">
         <p>Loading...</p>
+    </div>
+
+    <div id="error-screen" class="overlay-screen" hidden>
+        <div class="dialog">
+            <div class="dialog-titlebar">
+                <div class="dialog-title" id="error-title">Error</div>
+                <div class="dialog-controls">
+                    <div class="dialog-close" title="Close">×</div>
+                </div>
+            </div>
+            <div class="dialog-body">
+                <div class="dialog-icon">
+                    <img src="img/icon_512x512.png" alt="SteamDesktop Icon">
+                </div>
+                <p class="dialog-message" id="error-screen-message">
+                    An unexpected error occurred. Please try again later.
+                </p>
+            </div>
+            <div class="dialog-footer" id="error-screen-actions"></div>
+        </div>
     </div>
 
     <!-- Settings -->
@@ -71,7 +86,7 @@
     </div>
 
     <!-- Main -->
-    <div class="app-container">
+    <div id="app-screen" class="app-container" hidden>
         <div class="controls-topbar">
             <div class="account-details">
                 <img id="account-avatar" alt="User Avatar" src="img/defaultuserimage.png">

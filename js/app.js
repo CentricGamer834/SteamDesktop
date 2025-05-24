@@ -1,518 +1,634 @@
-// Development
+// app.js // development //
+
 import { storage } from "./storageManager.js";
 import { network } from "./networkManager.js";
 import { renderer } from "./renderManager.js";
 
+// IIFE for security
 (() => {
-	let steamApiKey = storage.get("steamApiKey");
-	let steamUserId = storage.get("steamId");
+	const getSteamApiKey = () => storage.get("steamApiKey");
+	const getSteamUserId = () => storage.get("steamUserId");
 
-	// #region DOM Elements
-	const loadingScreen = renderer.$("loading-screen");
-	const errorScreen = renderer.$("error-screen");
-	const gamesContainer = renderer.$("library");
-	const logoutBtn = renderer.$("logout-button");
-	const settingsModal = renderer.$("settings-modal");
-	const openSettingsBtn = renderer.$("settings-button");
-	const closeSettingsBtn = renderer.$("close-settings");
-	const settingsModalBackdrop = renderer.$("settings-modal-backdrop");
-	// #endregion DOM Elements
+	const dom = {
+		appScreen: renderer.$("app-screen"),
+		gamesContainer: renderer.$("library"),
+		logoutBtn: renderer.$("logout-button"),
+		settingsModal: renderer.$("settings-modal"),
+		openSettingsBtn: renderer.$("settings-button"),
+		closeSettingsBtn: renderer.$("close-settings"),
+		settingsBackdrop: renderer.$("settings-modal-backdrop"),
+		loadingScreen: renderer.$("loading-screen"),
 
-	// #region UI Functions
-	const showLoading = () => loadingScreen.hidden = false;
-	const hideLoading = () => loadingScreen.hidden = true;
-	const showError = (message, isFatal = true) => {
-		const errorScreenMsg = renderer.$("error-screen-message");
-		errorScreenMsg.textContent = "";
+		errorScreen: renderer.$("error-screen"),
+		errorScreenActions: renderer.$("error-screen-actions"),
+		errorScreenTitle: renderer.$("error-title"),
+		errorMessage: renderer.$("error-screen-message"),
 
-		const header = document.createElement("p");
-		header.innerHTML = `
-		<strong>${isFatal ? "A fatal error occurred!" : "An error occurred!"}</strong><br/><br/>
-		${message}<br/><br/>
-		${isFatal ? "You may need to log in again." : "You can try refreshing the page."}`;
-
-		const loginBtn = document.createElement("a");
-		loginBtn.textContent = "Log in again";
-		loginBtn.onclick = () => clearDataLogout();
-
-		const refreshBtn = document.createElement("a");
-		refreshBtn.textContent = "Refresh page";
-		refreshBtn.onclick = () => location.reload();
-
-		const errorActions = document.createElement("div");
-		errorActions.className = "error-actions";
-		errorActions.append(loginBtn, refreshBtn);
-
-		errorScreenMsg.append(header, errorActions);
-
-		errorScreen.hidden = false;
-		hideLoading();
+		searchInput: renderer.$("game-search"),
+		userAvatar: renderer.$("account-avatar"),
+		userName: renderer.$("account-name"),
+		userId: renderer.$("account-id")
 	};
 
-	const clearDataLogout = (msg = "Session expired. Logging out...", noErr) => {
-		const delay = 3000;
+	const screen = {
+		showApp() {
+			dom.appScreen.hidden = false
+		},
+		showLoading() { dom.loadingScreen.hidden = false },
+		hideLoading() { dom.loadingScreen.hidden = true },
+		showError(message, isFatal = true, shortMessage) {
+			// TODO: Remove!! Debug!!
+			setInterval(() => {
+				dom.appScreen.hidden = true;
+				dom.loadingScreen.hidden = true;
 
-		if (!noErr) {
-			console.warn(msg);
-			showError(`Redirecting to login in ${delay / 1000} seconds...`, true);
-		}
-
-		storage.clear();
-		setTimeout(() => window.location.replace("login.html"), delay);
-	};
-
-
-	function setupGamePopoutTrigger(card, game, rankIndex) {
-		let popout = null;
-		let delayIn, delayOut, carousel;
-
-		const clear = () => {
-			if (popout) popout.remove();
-			popout = null;
-			if (carousel) clearInterval(carousel);
-		};
-
-		const startCarousel = (imgs) => {
-			const el = popout.querySelector(".popout-carousel");
-			let i = 0;
-			el.style.backgroundImage = `url(${imgs[0].path_thumbnail || ""})`;
-			carousel = setInterval(() => {
-				i = (i + 1) % imgs.length;
-				el.style.backgroundImage = `url(${imgs[i].path_thumbnail || ""})`;
-			}, 1750);
-		};
-
-		const showPopout = async () => {
-			const {
-				playtime_forever,
-				rtime_last_played,
-				playtime_2weeks,
-				appid
-			} = game;
-
-			const {
-				header_image,
-				screenshots
-			} = await network.fetchAppDetails(appid);
-
-			const lastPlayedTimestamp = parseInt(rtime_last_played, 10);
-			const recentPlayMinutes = (playtime_2weeks || 0);
-			const totalHoursPlayed = (playtime_forever / 60).toFixed(1);
-			const lastPlayedDate = lastPlayedTimestamp
-				? new Date(lastPlayedTimestamp * 1000).toLocaleDateString()
-				: "Never";
-
-			popout = document.createElement("div");
-			popout.className = "game-info-popout";
-			popout.innerHTML = `
-<div class="popout-title">${game.name || "Unknown Game"}</div>
-<div class="popout-carousel" style="background-image: url(${header_image || ""});"></div>
-<div class="popout-seperator"></div>
-<div class="popout-stats-wrapper">
-    <div class="popout-stats">
-        <div class="popout-time-played">Time played</div>
-        <div>Total: ${totalHoursPlayed + "hrs"} | ${playtime_forever + "min"}</div>
-        <div>Last two weeks: ${recentPlayMinutes} min</div>
-        <div>Last played: ${lastPlayedDate ? lastPlayedDate : "Unknown"}</div>
-        <div>${storage.get("sortType") ? (storage.get("sortType")[0].toUpperCase() + storage.get("sortType").slice(1)) : "Sort Type"} ranking: ${(rankIndex + 1) ? "#" + (rankIndex + 1) : "Unknown"}</div>
-    </div>
-</div>`;
-			document.body.appendChild(popout);
-			renderer.clampElmToParent(card, popout);
-			popout.classList.add("show");
-			if (screenshots?.length) startCarousel(screenshots);
-		};
-
-		const scheduleShow = () => {
-			clearTimeout(delayIn);
-			clearTimeout(delayOut);
-			delayIn = setTimeout(() => card.matches(":hover") && showPopout(), 200);
-		}
-
-		const scheduleRemove = () => {
-			clearTimeout(delayIn);
-			delayOut = setTimeout(clear, 200);
-
-			window.removeEventListener("contextmenu", scheduleRemove);
-			window.removeEventListener("mouseleave", scheduleRemove);
-			window.removeEventListener("blur", scheduleRemove);
-		};
-
-		card.addEventListener("mouseenter", scheduleShow);
-		card.addEventListener("mouseleave", scheduleRemove);
-		card.addEventListener("mouseout", scheduleRemove);
-		window.addEventListener("contextmenu", scheduleRemove);
-		window.addEventListener("mouseleave", scheduleRemove);
-		window.addEventListener("blur", scheduleRemove);
-
-		document.addEventListener("mousemove", (e) => {
-			if (popout && !card.contains(e.target) && !popout.contains(e.target)) clear();
-		});
-	}
-
-	function createGameCard(gameData, index, rankedIds) {
-		const gameCard = document.createElement("section");
-		gameCard.className = "game-card";
-		gameCard.setAttribute("role", "link");
-		gameCard.onclick = () => {
-			// TODO
-			if (storage.get("redirectToSite")) {
-				window.open(`https://store.steampowered.com/app/${gameData.appid}`, "_blank");
-			} else {
-				window.open(`steam://rungameid/${gameData.appid}`, "_blank");
-			}
-		}
-
-		const coverImg = new Image();
-		coverImg.className = "cover-image";
-		coverImg.alt = gameData.name || `${gameData.name} cover image`;
-
-		const fallbackImages = [
-			`https://steamcdn-a.akamaihd.net/steam/apps/${gameData.appid}/library_600x900_2x.jpg`,
-			`https://shared.steamstatic.com/store_item_assets/steam/apps/${gameData.appid}/library_600x900.jpg`,
-			`https://shared.steamstatic.com/store_item_assets/steam/apps/${gameData.appid}/portrait.png`
-		];
-
-		let fallbackIndex = 0;
-		coverImg.onerror = () => {
-			if (fallbackIndex < fallbackImages.length - 1) {
-				coverImg.src = fallbackImages[++fallbackIndex];
-			} else {
-				coverImg.src = "img/defaultappimage.png";
-
-				const fallbackText = document.createElement("div");
-				fallbackText.className = "fallback-text";
-				fallbackText.textContent = gameData.name || "Unknown Game";
-				gameCard.appendChild(fallbackText);
-			}
-		};
-
-		// Lazy load setup for bad internet
-		if (storage.get("badInterwebs") === true) {
-			coverImg.loading = "lazy";
-			coverImg.dataset.src = fallbackImages[0];
-			gameCard.style.cssText = "visibility: hidden; opacity: 0; transition: opacity 2s ease-in-out;";
-
-			const observer = new IntersectionObserver((entries, obs) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting) {
-						const img = entry.target;
-						img.src = img.dataset.src;
-						gameCard.style.cssText = "visibility: visible; opacity: 1;";
-
-						obs.unobserve(img);
-					}
-				});
+				if (!dom.appScreen.hidden || dom.loadingScreen.hidden)
+					dom.loadingScreen.remove() && dom.appScreen.remove();
 			});
 
-			observer.observe(coverImg);
-		} else {
-			coverImg.src = fallbackImages[0];
+			dom.appScreen.hidden = true;
+			dom.loadingScreen.hidden = true;
+
+			dom.errorScreenTitle.innerText = shortMessage || "Error";
+
+			const defaultMsg = isFatal ? "A fatal error occurred!" : "An error occurred!";
+			const recoveryMsg = isFatal ? "You may need to log in again." : "You can try refreshing the page.";
+			dom.errorMessage.innerText = message || defaultMsg;
+			dom.errorMessage.innerText += `\n${recoveryMsg}`;
+
+			dom.errorScreenActions.innerHTML = "";
+
+			const loginBtn = document.createElement("button");
+			loginBtn.textContent = "Log in again";
+			loginBtn.onclick = logoutWithMessage;
+
+			const refreshBtn = document.createElement("button");
+			refreshBtn.textContent = "Reload page";
+			refreshBtn.onclick = () => location.reload();
+
+			dom.errorScreenActions.append(loginBtn, refreshBtn);
+			dom.errorScreen.hidden = false;
+		}
+	};
+
+	const handleLaunchApp = (appid) => {
+		const linkHandler = storage.get("linkHandler");
+
+		let openUrl = `https://store.steampowered.com/app/${appid}`;
+		if (linkHandler === "steam") {
+			openUrl = `steam://rungameid/${appid}`;
+		} else if (linkHandler === "steambrowser") {
+			openUrl = `steam://openurl/${openUrl}`
 		}
 
-		gameCard.appendChild(coverImg);
+		window.open(openUrl, "_blank")
+	}
 
-		// Show badges if enabled
-		if (storage.get("showBadges") === true) {
-			if (rankedIds.includes(gameData.appid)) {
-				const rank = rankedIds.indexOf(gameData.appid) + 1;
+	const gameCardManager = {
+		createGameCard(game, index, rankedIds) {
+			const { appid, name } = game;
+
+			const lazyLoad = storage.get("badInterwebs") === true;
+			const showBadges = storage.get("showBadges") === true;
+			const disablePopouts = storage.get("disablePopouts") === true;
+			const disableCtxMenus = storage.get("disableCtxMenus") === true;
+
+			const gameCard = document.createElement("section");
+			gameCard.className = "game-card";
+			gameCard.setAttribute("role", "link");
+			gameCard.onclick = () => {
+				handleLaunchApp(appid)
+			};
+
+			// ==== Many fallbacks ====
+			const coverImg = new Image();
+			coverImg.className = "cover-image";
+			coverImg.alt = name || "Game cover";
+
+			const fallbackImages = [
+				`https://steamcdn-a.akamaihd.net/steam/apps/${appid}/library_600x900_2x.jpg`,
+				`https://shared.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
+				`https://shared.steamstatic.com/store_item_assets/steam/apps/${appid}/portrait.png`
+			];
+
+			let fallbackIndex = 0;
+			coverImg.onerror = () => {
+				if (++fallbackIndex < fallbackImages.length) {
+					coverImg.src = fallbackImages[fallbackIndex];
+				} else {
+					coverImg.src = "img/defaultappimage.png";
+					const fallbackText = document.createElement("div");
+					fallbackText.className = "fallback-text";
+					fallbackText.textContent = name || "Unknown Game";
+					gameCard.appendChild(fallbackText);
+				}
+			};
+
+			if (lazyLoad) {
+				coverImg.loading = "lazy";
+				coverImg.dataset.src = fallbackImages[0];
+				gameCard.style.cssText = "visibilit y: hidden; opacity: 0; transition: opacity 2s ease-in-out;";
+
+				new IntersectionObserver((entries, obs) => {
+					for (const entry of entries) {
+						if (entry.isIntersecting) {
+							entry.target.src = entry.target.dataset.src;
+							gameCard.style.cssText = "visibility: visible; opacity: 1;";
+							obs.unobserve(entry.target);
+						}
+					}
+				}).observe(coverImg);
+			} else {
+				coverImg.src = fallbackImages[0];
+			}
+
+			gameCard.appendChild(coverImg);
+
+			if (showBadges && rankedIds.includes(appid)) {
+				const rank = rankedIds.indexOf(appid) + 1;
 				const badge = document.createElement("div");
 				badge.className = `game-rank-badge rank-${rank}`;
 				badge.innerText = rank;
 				gameCard.prepend(badge);
 			}
+
+			if (!disablePopouts)
+				this.createGameCardPopout(gameCard, game, index);
+
+			if (!disableCtxMenus)
+				renderer.registerCtxMenuHandler(gameCard, [
+					{
+						type: "link", label: "Play", url: `steam://rungameid/${appid}`
+					},
+					{
+						type: "link", label: "Install", url: `steam://install/${appid}`
+					},
+					{
+						type: "link", label: "View on Steam", url: `https://store.steampowered.com/app/${appid}`
+					},
+					{
+						type: "link", label: "View News", url: `https://store.steampowered.com/app/${appid}/news/`
+					},
+					{
+						type: "link", label: "View Screenshots", url: `https://store.steampowered.com/app/${appid}/screenshots/`
+					},
+					{
+						type: "link", label: "View Videos", url: `https://store.steampowered.com/app/${appid}/videos/`
+					}
+				]);
+
+			return gameCard;
+		},
+
+		createGameCardPopout(card, game, rankIndex) {
+			let popout = null;
+			let carousel = null;
+			let delayIn = null;
+			let delayOut = null;
+
+			const clearPopout = () => {
+				if (carousel) {
+					clearInterval(carousel);
+					carousel = null;
+				}
+				if (popout) {
+					popout.remove();
+					popout = null;
+				}
+			};
+
+			const rotateScreenshots = (images) => {
+				if (!popout) return;
+				const container = popout.querySelector(".popout-carousel");
+				if (!container) return;
+				let i = 0;
+				container.style.backgroundImage = `url(${images[0].path_thumbnail || ""})`;
+				carousel = setInterval(() => {
+					i = (i + 1) % images.length;
+					if (container) {
+						container.style.backgroundImage = `url(${images[i].path_thumbnail || ""})`;
+					}
+				}, 1750);
+			};
+
+			const showPopout = async () => {
+				clearPopout(); // Always start fresh
+
+				const { appid, name, playtime_forever = 0, rtime_last_played = 0, playtime_2weeks = 0 } = game;
+				const { header_image, screenshots } = await network.fetchAppDetails(appid);
+
+				const hours = (playtime_forever / 60).toFixed(1);
+				const lastPlayed = rtime_last_played
+					? new Date(rtime_last_played * 1000).toLocaleDateString()
+					: "Never";
+				const sortType = storage.get("sortType");
+				const sortLabel = sortType ? sortType[0].toUpperCase() + sortType.slice(1) : "Sort Type";
+				const rank = rankIndex >= 0 ? `#${rankIndex + 1}` : "Unknown";
+
+				popout = document.createElement("div");
+				popout.className = "game-info-popout";
+				popout.innerHTML = `
+<div class="popout-title">${name || "Unknown Game"}</div>
+<div class="popout-carousel" style="background-image: url(${header_image || ""});"></div>
+<div class="popout-seperator"></div>
+<div class="popout-stats-wrapper">
+	<div class="popout-stats">
+		<div class="popout-time-played">Time played</div>
+		<div>Total: ${hours} hrs | ${playtime_forever} min</div>
+		<div>Last two weeks: ${playtime_2weeks} min</div>
+		<div>Last played: ${lastPlayed}</div>
+		<div>${sortLabel} ranking: ${rank}</div>
+	</div>
+</div>`;
+				document.body.appendChild(popout);
+				renderer.clampElmToParent(card, popout);
+				popout.classList.add("show");
+
+				if (screenshots?.length > 0) rotateScreenshots(screenshots);
+			};
+
+			const scheduleShow = () => {
+				clearTimeout(delayIn);
+				clearTimeout(delayOut);
+				delayIn = setTimeout(() => {
+					if (card.matches(":hover")) showPopout();
+				}, 200);
+			};
+
+			const scheduleRemove = () => {
+				clearTimeout(delayIn);
+				clearTimeout(delayOut);
+				delayOut = setTimeout(clearPopout, 200);
+			};
+
+			card.addEventListener("mouseenter", scheduleShow);
+			card.addEventListener("mouseleave", scheduleRemove);
+			card.addEventListener("mouseout", scheduleRemove);
+			window.addEventListener("contextmenu", scheduleRemove);
+			window.addEventListener("mouseleave", scheduleRemove);
+			window.addEventListener("blur", scheduleRemove);
+
+			document.addEventListener("mousemove", (e) => {
+				if (popout && !card.contains(e.target) && !popout.contains(e.target)) {
+					clearPopout();
+				}
+			});
 		}
+	};
 
-		// functionality triggers
-		setupGamePopoutTrigger(gameCard, gameData, index);
+	const logoutWithMessage = (msg = "Session expired. Logging out...", skipError = false) => {
+		console.log("Testing Testing Testing");
+		storage.clear();
+		setTimeout(() => location.replace("login.html"), 1000);
+	};
 
-		// THOS IS THE ERRORING CODE ILL FIX IT G
-		renderer.registerCtxMenuHandler(gameCard, [
-			{ type: "link", label: "Play", url: `steam://rungameid/${gameData.appid}` },
-			{ type: "link", label: "View on Steam", url: `https://store.steampowered.com/app/${gameData.appid}` },
-			{ type: "link", label: "View News", url: `https://store.steampowered.com/app/${gameData.appid}/news/` },
-			{ type: "link", label: "View Screenshots", url: `https://store.steampowered.com/app/${gameData.appid}/screenshots/` },
-			{ type: "link", label: "View Videos", url: `https://store.steampowered.com/app/${gameData.appid}/videos/` }
-		]);
+	const renderGames = (gamesList) => {
+		const hideUnplayed = storage.get("hideUnplayed") === true;
+		const sortType = storage.get("sortType");
 
-		return gameCard;
-	}
+		if (hideUnplayed)
+			gamesList = gamesList.filter(game => game.playtime_forever);
 
-	function sortAndRankThenRenderGames(gamesList) {
-		switch (storage.get("sortType")) {
-			case "name":
-				gamesList.sort((a, b) => a.name.localeCompare(b.name));
-				break;
-			case "recent":
-				gamesList.sort((a, b) => b.rtime_last_played - a.rtime_last_played);
-				break;
-			default:
-				gamesList.sort((a, b) => b.playtime_forever - a.playtime_forever);
-		}
+		const sortBy = {
+			name: (a, b) => a.name.localeCompare(b.name),
+			recent: (a, b) => b.rtime_last_played - a.rtime_last_played,
+			playtime: (a, b) => b.playtime_forever - a.playtime_forever
+		};
+
+		gamesList.sort(sortBy[sortType] || sortBy.playtime);
+
+		dom.gamesContainer.className = `size-${storage.get("gameSize") || "default"}`;
+		dom.gamesContainer.innerHTML = "";
 
 		const topIds = gamesList.slice(0, 3).map(g => g.appid);
 
-		// clear games container
-		gamesContainer.innerHTML = "";
-
-		const filterableGameElements = gamesList.map((game, rank) => {
-			const gameCard = createGameCard(game, rank, topIds);
-			gamesContainer.appendChild(gameCard);
-			return {
-				element: gameCard,
-				name: game.name.toLowerCase()
-			};
+		const searchMap = gamesList.map((game, i) => {
+			const card = gameCardManager.createGameCard(game, i, topIds);
+			dom.gamesContainer.appendChild(card);
+			return { element: card, name: game.name.toLowerCase() };
 		});
 
-		function registerSearchInput() {
-			const searchInpt = renderer.$("game-search");
+		dom.searchInput.addEventListener("input", () => {
+			const term = dom.searchInput.value.trim().toLowerCase();
+			searchMap.forEach(({ element, name }) => {
+				const match = !term || name.includes(term);
+				element.style.visibility = match ? "visible" : "hidden";
+				element.style.display = match ? "block" : "none";
+			});
+		});
+	};
 
-			const filterGames = () => {
-				const filterString = searchInpt.value.trim().toLowerCase();
+	// Avatar, Name, ID etc.
+	const fillUserDetails = async () => {
+		const { avatarmedium, personaname, steamid } = await network.fetchUserDetails(getSteamUserId(), getSteamApiKey());
+		dom.userAvatar.src = avatarmedium || "img/defaultuserimage.png";
+		dom.userAvatar.onerror = () => (dom.userAvatar.src = "img/defaultuserimage.png");
+		dom.userName.innerHTML = personaname || "Unknown User";
+		dom.userId.innerHTML = steamid || "Unknown ID";
+	};
 
-				filterableGameElements.forEach(({ element, name }) => {
-					const matches = !filterString || name.includes(filterString);
-					element.style.visibility = matches ? "visible" : "hidden";
-					element.style.display = matches ? "block" : "none";
-				});
-			};
+	const loadCustomCss = () => {
+		console.log("Loading custom CSS");
+		const cssText = storage.get("customCss");
+		console.log("Custom CSS: ", cssText);
+		const styleElement = document.createElement("style");
+		styleElement.id = "CUSTOMCSS";
+		styleElement.innerHTML = cssText;
+		document.head.appendChild(styleElement);
 
-			searchInpt.addEventListener("input", filterGames);
-		}
+		console.log("Appended custom CSS code to head", styleElement);
+	};
 
-		registerSearchInput();
+	const exportConfig = () => {
+		const allSettings = storage.getAll();
+		const blob = new Blob([JSON.stringify(allSettings, null, 2)], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
+
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = "steamdesktop-settings.json";
+		a.click();
+
+		URL.revokeObjectURL(url);
 	}
 
-	async function renderUserDetails() {
-		const userAvatar = renderer.$("account-avatar");
-		const userName = renderer.$("account-name");
-		const userId = renderer.$("account-id");
+	const importConfig = async () => {
+		const tryOpenFile = async () => {
+			return new Promise((resolve, reject) => {
+				const fileElm = document.createElement("input");
+				fileElm.type = "file";
+				fileElm.accept = ".json";
+				fileElm.click();
 
-		const { avatarmedium, personaname, steamid } = await network.fetchUserDetails(steamUserId, steamApiKey);
+				fileElm.addEventListener("change", function () {
+					const file = this.files?.[0];
+					if (!file) return reject("No settings file selected");
 
-		userAvatar.src = avatarmedium || "img/defaultuserimage.png";
-		userAvatar.onerror = () => {
-			userAvatar.src = "img/defaultuserimage.png";
+					const reader = new FileReader();
+					reader.onload = function (e) {
+						const result = e.target?.result;
+						if (typeof result !== "string") return reject("Invalid settings content");
+
+						try {
+							const parsed = JSON.parse(result);
+							resolve(parsed);
+						} catch {
+							reject("Invalid JSON");
+						}
+					};
+
+					reader.onerror = () => reject("Failed to read settings file");
+					reader.readAsText(file);
+				});
+			});
 		};
 
-		userName.innerText = personaname || "Unknown User";
-		userId.innerText = steamid || "Unknown ID";
-	}
+		try {
+			const importedConfig = await tryOpenFile();
+			if (typeof importedConfig !== "object" || importedConfig === null) {
+				throw new Error("Imported config is not an object");
+			}
+
+			storage.setAll(importedConfig);
+			alert("Settings imported successfully.");
+			location.reload(); // Refresh to apply new settings
+		} catch (err) {
+			console.error("Import failed:", err);
+			alert(`Failed to import settings: ${err}`);
+		}
+	};
 
 	function renderAppSettings() {
-		const dynamicZettings = {
-			renderingSettings: {
-				type: "divider",
-				label: "Render Settings"
+		const settingsSchema = {
+			gameFilters: { type: "divider", label: "Game Filters" },
+			dontIncludePlayedFreeGames: { label: "Hide played free games", value: false, type: "checkbox" },
+			hideUnplayed: {
+				label: "Hide unplayed games",
+				value: false,
+				type: "checkbox"
 			},
-			sortType: {
-				label: "Sort by",
-				value: "playtime",
+			renderingSettings: { type: "divider", label: "Render Settings" },
+			disablePopouts: {
+				label: "Disable Stat Popouts",
+				value: false,
+				type: "checkbox"
+			},
+			disableCtxMenus: {
+				label: "Disable Right Click Menus",
+				value: false,
+				type: "checkbox"
+			},
+			showBadges: { label: "Show badges", value: true, type: "checkbox" },
+			badInterwebs: { label: "Bad internet? Reduce network usage.", value: false, type: "checkbox" },
+			customBehavior: {
+				label: "Custom Behavior",
+				type: "divider",
+			},
+			customCss: {
+				label: "Custom CSS code (Advanced)",
+				type: "textarea",
+				value: `.game-card { background-color: red; }`
+			},
+			linkHandler: {
+				label: "How to open links",
 				type: "select",
 				options: [
-					{ value: "playtime", label: "Playtime" },
-					{ value: "recent", label: "Recently Played" },
-					{ value: "name", label: "Name" }
+					{
+						label: "Open in browser",
+						value: "browser"
+					},
+					{
+						label: "Open in steam",
+						value: "steam"
+					},
+					{
+						label: "Open in steam browser",
+						value: "steambrowser"
+					},
 				]
 			},
-			includeFreeGames: {
-				label: "Display free games",
-				value: true,
-				type: "checkbox"
-			},
-			redirectToSite: {
-				label: "Open links in browser",
-				value: false,
-				type: "checkbox"
-			},
-			showBadges: {
-				label: "Show badges",
-				value: true,
-				type: "checkbox"
-			},
-			badInterwebs: {
-				label: "Bad internet? Reduce network usage.",
-				value: false,
-				type: "checkbox"
-			},
-			loginDetailsArea: {
+			loginDetailsArea: { type: "divider", label: "Login Details" },
+			steamUserId: { label: "Steam ID", value: getSteamUserId(), type: "text" },
+			steamApiKey: { label: "Steam API Key", value: getSteamApiKey(), type: "text" },
+			importExportConfig: {
+				label: "Import/Export Settings",
 				type: "divider",
-				label: "Login Details"
 			},
-			steamId: {
-				label: "Steam ID",
-				value: steamUserId,
-				type: "text"
+			importConfig: {
+				label: "Import Settings",
+				type: "button",
+				action: importConfig
 			},
-			steamApiKey: {
-				label: "Steam API Key",
-				value: steamApiKey,
-				type: "text"
-			}
+			exportConfig: {
+				label: "Export Saved Settings",
+				type: "button",
+				action: exportConfig
+			},
 		};
 
 		const container = renderer.$("settings-container");
-		const saveSettingsBtn = renderer.$("save-settings");
-		const resetSettingsBtn = renderer.$("reset-settings");
+		const saveBtn = renderer.$("save-settings");
+		const resetBtn = renderer.$("reset-settings");
 
-		// Load values
 		const savedSettings = storage.getAll();
 
-		// Initialize settings state from saved or default values
-		for (const key in dynamicZettings) {
-			const savedVal = savedSettings[key];
-			storage.set(key, savedVal !== undefined ? savedVal : dynamicZettings[key].value);
-		}
+		Object.entries(settingsSchema).forEach(([key, def]) => {
+			storage.set(key, savedSettings[key] !== undefined ? savedSettings[key] : def.value);
+		});
 
-		// Render settings inputs
-		Object.entries(dynamicZettings).forEach(([key, { label, value, type: elementType, options }]) => {
-			const formGroup = document.createElement("div");
-			formGroup.className = "settings-modal-group";
+		Object.entries(settingsSchema).forEach(([key, def]) => {
+			const group = document.createElement("div");
+			group.className = "settings-modal-group";
 
-			if (elementType !== "divider") {
-				const inputLabel = document.createElement("label");
-				inputLabel.setAttribute("for", key);
-				inputLabel.innerText = label;
-				formGroup.appendChild(inputLabel);
-			}
-
-			let settingsInput;
-
-			switch (elementType) {
+			let el;
+			switch (def.type) {
 				case "select":
-					settingsInput = document.createElement("select");
-					settingsInput.innerHTML = options.map(opt =>
+					el = document.createElement("select");
+					el.innerHTML = def.options.map(opt =>
 						`<option value="${opt.value}" ${opt.value === storage.get(key) ? "selected" : ""}>${opt.label}</option>`
 					).join("");
 					break;
 				case "divider":
-					settingsInput = document.createElement("div");
-					settingsInput.innerHTML = label;
+					el = document.createElement("div");
+					el.innerHTML = def.label;
 					break;
 				case "checkbox":
-					settingsInput = document.createElement("input");
-					settingsInput.type = "checkbox";
-
-					if (storage.get(key) === true)
-						settingsInput.checked = true
+					el = document.createElement("input");
+					el.type = "checkbox";
+					el.checked = !!storage.get(key);
 					break;
 				case "text":
-					settingsInput = document.createElement("input");
-					settingsInput.type = "text";
-					settingsInput.value = storage.get(key) ?? value;
+					el = document.createElement("input");
+					el.type = "text";
+					el.value = storage.get(key) ?? def.value;
+					break;
+				case "number":
+					el = document.createElement("input");
+					el.type = "number";
+					el.value = storage.get(key) ?? def.value;
+					break;
+				case "textarea":
+					el = document.createElement("textarea");
+					el.value = storage.get(key) ?? `.controls-topbar { resize: vertical; overflow: hidden; }`;
+					break;
+				case "button":
+					el = document.createElement("button");
+					el.innerText = def.label;
+					el.classList.add("button");
+
+					if (def.action && typeof def.action === "function") {
+						el.addEventListener("click", () => {
+							def.action?.();
+						});
+					}
+
 					break;
 				default:
-					settingsInput = document.createElement("a");
-					break;
+					el = document.createElement("a");
+			}
+			el.id = key;
+			el.className = `settings-modal-item ${def.type}`;
+
+			if (def.type !== "divider") {
+				const label = document.createElement("label");
+				label.setAttribute("for", key);
+				label.innerText = def.label;
+				group.appendChild(label);
 			}
 
-			settingsInput.id = key;
-
-			if (settingsInput.type === "checkbox") {
-				settingsInput.addEventListener("change", () => storage.set(key, settingsInput.checked));
-				formGroup.classList.add("sameline");
-				formGroup.prepend(settingsInput);
+			if (el.type === "checkbox") {
+				group.classList.add("sameline");
+				group.prepend(el);
 			} else {
-				settingsInput.addEventListener("change", () => storage.set(key, settingsInput.value));
-				formGroup.appendChild(settingsInput);
+				group.appendChild(el);
 			}
 
-			if (elementType) {
-				settingsInput.classList.add("settings-" + elementType)
-			}
-
-			container.appendChild(formGroup);
+			container.appendChild(group);
 		});
 
-		// Save current settings
-		saveSettingsBtn.addEventListener("click", () => {
-			const settings = Object.keys(dynamicZettings).reduce((acc, key) => {
-				acc[key] = storage.get(key);
-				return acc;
-			}, {});
+		const showSettings = () => dom.settingsModal.hidden = false;
+		const hideSettings = () => dom.settingsModal.hidden = true;
+
+		saveBtn.addEventListener("click", () => {
+			const settings = {};
+
+			Object.entries(settingsSchema).forEach(([key, def]) => {
+				const input = container.querySelector(`#${key}`);
+				if (!input || def.type === "divider") return;
+
+				if (input.type === "checkbox") {
+					settings[key] = input.checked;
+				} else if (input.tagName === "SELECT" || input.tagName === "INPUT" || input.tagName === "TEXTAREA") {
+					settings[key] = input.value;
+				}
+			});
 
 			storage.setAll(settings);
-			settingsModal.hidden = true;
-
-			// Reload the page to apply changes
-			//
-			//
-			// Todo replace with a better way to apply changes
-			location.reload();
-			//
-			//
-			//
+			dom.settingsModal.hidden = true;
+			location.reload(); // TODO: Replace with live reload
 		});
 
-		// Reset to default settings
-		resetSettingsBtn.addEventListener("click", () => {
-			Object.entries(dynamicZettings).forEach(([key, { value }]) => {
-				storage.set(key, value);
+		resetBtn.addEventListener("click", () => {
+			Object.entries(settingsSchema).forEach(([key, def]) => {
+				storage.set(key, def.value);
 				const input = container.querySelector(`#${key}`);
 				if (input) {
 					if (input.type === "checkbox") {
-						input.checked = value;
+						input.checked = def.value;
 					} else {
-						input.value = value;
+						input.value = def.value;
 					}
 				}
 			});
-			// Reload the page to apply changes
-			//
-			//
-			// Todo replace with a better way to apply changes
-			location.reload();
-			//
-			//
-			//
+
+			dom.settingsModal.hidden = true;
+			location.reload(); // TODO: Replace with live reload
 		});
 
-		// Close listeners
-		document.addEventListener("keydown", (e) => {
-			if (e.key === "Escape" && !settingsModal.hidden) settingsModal.hidden = true;
-		});
-		settingsModalBackdrop.addEventListener("click", () => settingsModal.hidden = true);
-		[openSettingsBtn, closeSettingsBtn].forEach(btn =>
-			btn.addEventListener("click", () => settingsModal.hidden = true)
-		);
-
-		// Open settings
-		openSettingsBtn.addEventListener("click", () => settingsModal.removeAttribute("hidden"));
+		document.addEventListener("keydown", e => e.key === "Escape" ? hideSettings() : null)
+		renderer.$("settings-modal-backdrop").addEventListener("click", hideSettings);
+		dom.closeSettingsBtn.addEventListener("click", hideSettings);
+		dom.openSettingsBtn.addEventListener("click", showSettings);
 	}
-	// #endregion UI Functions
 
-	// #region INIT
-	async function loadAndRender() {
-		showLoading();
-
+	async function initializeApp() {
 		try {
-			const games = await network.fetchOwnedGames(
-				steamUserId,
-				steamApiKey,
-				storage.get("includeFreeGames")
-			);
-			console.log(games)
+			screen.showLoading();
+			const userId = getSteamUserId();
+			const key = getSteamApiKey();
 
+			if (!userId || !key) throw new Error("Missing credentials");
+			const gamesList = await network.fetchOwnedGames(userId, key, storage.get("dontIncludePlayedFreeGames") === false);
+			if (!gamesList.length) throw new Error("No games found for user.");
+
+			loadCustomCss();
 			renderAppSettings();
-			sortAndRankThenRenderGames(games);
-			renderUserDetails();
-		} catch (e) {
-			if (/missing|invalid/i.test(e.message))
-				showError("Invalid Steam ID or API Key. Please refresh the page or log in again.")
-			else
-				showError("Load error: " + e.message);
-		} finally {
-			hideLoading();
+			renderGames(gamesList);
+			await fillUserDetails();
+			screen.hideLoading();
+			screen.showApp();
+		} catch (err) {
+			if (/missing|invalid/i.test(err.message)) {
+				screen.showError("Invalid Steam ID or API Key. Please refresh the page or log in again.")
+			} else {
+				let translatedText = network.translateHttpError(err);
+				if (err.message) {
+					screen.showError(`Initialization error: ${err.message}`);
+				} else if (translatedText) {
+					screen.showError(`Requesting data from Steam failed: ${translatedText}`)
+				} else {
+					screen.showError("Initialization Failed", err)
+				}
+			}
 		}
-	}
+	};
 
-	logoutBtn.addEventListener("click", () => clearDataLogout("Logging out...", true));
-
-
+	// onDocumentReady
 	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", loadAndRender);
+		document.addEventListener("DOMContentLoaded", initializeApp);
 	} else {
-		loadAndRender();
+		initializeApp();
 	}
-	// #endregion INIT
+
+	dom.logoutBtn.addEventListener("click", () => logoutWithMessage("Logging out...", true));
 })();

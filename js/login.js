@@ -4,14 +4,14 @@ import { renderer } from "./renderManager.js";
 
 (() => {
 	const loginForm = renderer.$("login-form"),
-		steamIdInput = renderer.$("accountId"),
+		steamUserIdInput = renderer.$("accountId"),
 		apiKeyInput = renderer.$("apiKey"),
 		errorDisplay = renderer.$("error-display"),
 		autoFillCheckbox = renderer.$("auto-fill"),
 		autoLoginCheckbox = renderer.$("auto-login"),
-		submitButton = renderer.$("submit");
+		submitButton = renderer.$("login");
 
-	const isValidSteamId = (id) => /^[0-9]{17}$/.test(id);
+	const isValidsteamUserId = (id) => /^[0-9]{17}$/.test(id);
 	const isValidApiKey = (key) => /^[A-F0-9]{32}$/i.test(key);
 
 	const showError = (msg) => {
@@ -26,7 +26,7 @@ import { renderer } from "./renderManager.js";
 
 	const disableSubmit = () => {
 		let seconds = 3;
-		const inputs = [submitButton, steamIdInput, apiKeyInput];
+		const inputs = [submitButton, steamUserIdInput, apiKeyInput];
 		inputs.forEach((el) => (el.disabled = true));
 
 		const countdown = () => {
@@ -42,32 +42,32 @@ import { renderer } from "./renderManager.js";
 		countdown();
 	};
 
-	const validateAndRedirect = async (steamId, steamApiKey) => {
-		if (!steamId || !steamApiKey) throw new Error("Missing credentials");
-		if (!isValidSteamId(steamId)) throw new Error("Invalid Steam ID (17 digits required)");
+	const validateAndRedirect = async (steamUserId, steamApiKey) => {
+		if (!steamUserId || !steamApiKey) throw new Error("Missing credentials");
+		if (!isValidsteamUserId(steamUserId)) throw new Error("Invalid Steam ID (17 digits required)");
 		if (!isValidApiKey(steamApiKey)) throw new Error("Invalid API Key (32-char hex)");
 
 		try {
-			await network.fetchOwnedGames(steamId, steamApiKey, false, false);
+			await network.fetchOwnedGames(steamUserId, steamApiKey, false, false);
 			window.location.replace("app.html");
 			return true;
 		} catch (err) {
-			showError(network.translateHttpError(err.message));
+			showError(network.translateHttpError(err));
 			return false;
 		}
 	};
 
 	// Prefill from storage
-	if (storage.get("autoFill") === "true") {
-		steamIdInput.value = storage.get("steamId") || "";
+	if (storage.get("autoFill") === true) {
+		steamUserIdInput.value = storage.get("steamUserId") || "";
 		apiKeyInput.value = storage.get("steamApiKey") || "";
 		autoFillCheckbox.checked = true;
 	}
 
-	if (storage.get("autoLogin") === "true") {
+	if (storage.get("autoLogin") === true) {
 		autoLoginCheckbox.checked = true;
 		disableSubmit();
-		validateAndRedirect(storage.get("steamId") || "", storage.get("steamApiKey") || "");
+		validateAndRedirect(storage.get("steamUserId") || "", storage.get("steamApiKey") || "");
 	}
 
 	loginForm.addEventListener("submit", async (e) => {
@@ -77,10 +77,10 @@ import { renderer } from "./renderManager.js";
 		clearError();
 		disableSubmit();
 
-		const steamId = steamIdInput.value.trim();
+		const steamUserId = steamUserIdInput.value.trim();
 		const apiKey = apiKeyInput.value.trim();
 
-		if (!isValidSteamId(steamId)) {
+		if (!isValidsteamUserId(steamUserId)) {
 			showError("Steam ID must be a 17-digit number.");
 			return;
 		}
@@ -90,23 +90,23 @@ import { renderer } from "./renderManager.js";
 			return;
 		}
 
-		const success = await validateAndRedirect(steamId, apiKey);
+		const success = await validateAndRedirect(steamUserId, apiKey);
 		if (!success) return;
 
 		if (autoFillCheckbox.checked) {
-			storage.set("autoFill", "true");
-			storage.set("steamId", steamId);
+			storage.set("autoFill", true);
+			storage.set("steamUserId", steamUserId);
 			storage.set("steamApiKey", apiKey);
 		} else {
-			["autoFill", "steamId", "steamApiKey"].forEach((k) => storage.remove(k));
+			["autoFill", "steamUserId", "steamApiKey"].forEach((k) => storage.remove(k));
 		}
 
 		if (autoLoginCheckbox.checked) {
-			storage.set("autoLogin", "true");
+			storage.set("autoLogin", true);
 		} else {
 			storage.remove("autoLogin");
 		}
 	});
 
-	[steamIdInput, apiKeyInput].forEach((input) => input.addEventListener("input", clearError));
+	[steamUserIdInput, apiKeyInput].forEach((input) => input.addEventListener("input", clearError));
 })();

@@ -61,10 +61,8 @@ export const network = (() => {
 
     return {
         proxifyUrl,
-
         translateHttpError(err) {
             if (!err || !err.isNetworkError) return "❌ Unexpected error occurred.";
-
             const statusMap = {
                 400: "⚠️ Bad request. Check your inputs.",
                 401: "❌ Unauthorized: Invalid API Key OR Proxy error.",
@@ -89,7 +87,7 @@ export const network = (() => {
 
         async fetchOwnedGames(steamUserId, steamApiKey, includePlayedFreeGames = true, includeAppInfo = true) {
             if (!steamUserId || !steamApiKey) throw new Error("Missing Steam credentials.");
-            const url = proxifyUrl(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamUserId}&include_appinfo=${includeAppInfo ? 1 : 0}&include_played_free_games=${includePlayedFreeGames ? 1 : 0}&format=json`);
+            const url = proxifyUrl(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamId=${steamUserId}&include_appinfo=${includeAppInfo ? "1" : "0"}&include_played_free_games=${includePlayedFreeGames ? "1" : "0"}&format=json`);
             const data = await fetchJson(url);
             const games = data?.content?.response?.games;
             if (!Array.isArray(games) || !games.length) throw new Error("No owned games found.");
@@ -98,7 +96,7 @@ export const network = (() => {
 
         async fetchUserDetails(steamUserId, steamApiKey) {
             if (!steamUserId || !steamApiKey) throw new Error("Missing Steam credentials.");
-            const url = proxifyUrl(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${steamApiKey}&steamids=${steamUserId}`);
+            const url = proxifyUrl(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${steamApiKey}&steamIds=${steamUserId}`);
             const data = await fetchJson(url);
             return data?.content?.response?.players[0];
         }
