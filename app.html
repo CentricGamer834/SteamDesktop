@@ -73,20 +73,21 @@
     <!-- Main -->
     <div class="app-container">
         <div class="controls-topbar">
-            <div class="user-info">
-                <img alt="User Avatar" src="img/defaultuserimage.png" id="user-avatar">
-                <div class="user-details">
-                    <span class="username" id="user-name">Unknown Soldier</span>
-                    <span class="username" id="user-id">1234567890123ABC</span>
+            <div class="account-details">
+                <img id="account-avatar" alt="User Avatar" src="img/defaultuserimage.png">
+                <div class="account-specifics">
+                    <span class="username" id="account-name">Unknown Soldier</span>
+                    <span class="username" id="account-id">1234567890123ABC</span>
                 </div>
             </div>
+            <input id="game-search" type="text" placeholder="Search games...">
             <nav class="user-actions">
                 <button class="button" id="settings-button">Settings</button>
                 <button class="button danger" id="logout-button">Logout</button>
             </nav>
         </div>
 
-        <main id="games"></main>
+        <main id="library"></main>
     </div>
 </body>
 

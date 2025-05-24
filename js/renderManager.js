@@ -1,10 +1,10 @@
 export const renderer = {
     $: (selector) => document.getElementById(selector),
 
-    clampElmToParent(motherElm, element) {
+    clampElmToParent(motherElm, elementToClamp) {
         const { scrollX, scrollY } = window;
         const rect = motherElm.getBoundingClientRect();
-        const pRect = element.getBoundingClientRect();
+        const pRect = elementToClamp.getBoundingClientRect();
 
         let left = rect.right + scrollX + 15;
         let top = rect.top + scrollY;
@@ -16,12 +16,23 @@ export const renderer = {
             top = rect.bottom - pRect.height + scrollY;
         }
 
-        element.style.left = `${Math.max(scrollX, left)}px`;
-        element.style.top = `${Math.max(scrollY, top)}px`;
-        return element;
+        elementToClamp.style.left = `${Math.max(scrollX, left)}px`;
+        elementToClamp.style.top = `${Math.max(scrollY, top)}px`;
+        return elementToClamp;
     },
 
-    registerCtxMenuHandler(motherElm, creationData = []) {
+    /**
+     * Creates a context menu for an element
+     * @param {HTMLElement} motherElm
+     * @param {Array<{
+     * items: {
+     *     type: "label" | "link" | "submenu",
+     *     url: "https://example.com" | undefined,
+     *     action: typeof Function | undefined
+     * }
+     * }>} menuOptions
+     */
+    registerCtxMenuHandler(motherElm, menuOptions) {
         const ctxMenuBackdrop = document.createElement("div");
         ctxMenuBackdrop.className = "context-menu-backdrop";
 
@@ -72,12 +83,7 @@ export const renderer = {
 
         const ctxMenu = createMenu(
             [
-                {
-                    label: "Reload",
-                    type: "action",
-                    action: window.location.reload,
-                },
-                ...creationData,
+                ...menuOptions,
             ],
             0
         );
@@ -113,5 +119,3 @@ export const renderer = {
         window.addEventListener("blur", hideMenu);
     },
 };
-
-export default renderer.$;

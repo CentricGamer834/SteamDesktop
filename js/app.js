@@ -4,29 +4,25 @@ import { network } from "./networkManager.js";
 import { renderer } from "./renderManager.js";
 
 (() => {
-	const $ = renderer.$;
 	let steamApiKey = storage.get("steamApiKey");
 	let steamUserId = storage.get("steamId");
 
 	// #region DOM Elements
-	const loadingScreen = $("loading-screen");
-	const errorScreen = $("error-screen");
-	const gamesContainer = $("games");
-	const logoutBtn = $("logout-button");
-	const settingsModal = $("settings-modal");
-	const openSettingsBtn = $("settings-button");
-	const closeSettingsBtn = $("close-settings");
-	const settingsModalBackdrop = $("settings-modal-backdrop");
-	const userAvatar = $("user-avatar");
-	const userName = $("user-name");
-	const userId = $("user-id");
+	const loadingScreen = renderer.$("loading-screen");
+	const errorScreen = renderer.$("error-screen");
+	const gamesContainer = renderer.$("library");
+	const logoutBtn = renderer.$("logout-button");
+	const settingsModal = renderer.$("settings-modal");
+	const openSettingsBtn = renderer.$("settings-button");
+	const closeSettingsBtn = renderer.$("close-settings");
+	const settingsModalBackdrop = renderer.$("settings-modal-backdrop");
 	// #endregion DOM Elements
 
 	// #region UI Functions
 	const showLoading = () => loadingScreen.hidden = false;
 	const hideLoading = () => loadingScreen.hidden = true;
 	const showError = (message, isFatal = true) => {
-		const errorScreenMsg = $("error-screen-message");
+		const errorScreenMsg = renderer.$("error-screen-message");
 		errorScreenMsg.textContent = "";
 
 		const header = document.createElement("p");
@@ -231,13 +227,13 @@ import { renderer } from "./renderManager.js";
 		setupGamePopoutTrigger(gameCard, gameData, index);
 
 		// THOS IS THE ERRORING CODE ILL FIX IT G
-		// renderer.setupCtxMenu(gameCard, [
-		// 	{ label: "Play", url: `steam://rungameid/${gameData.appid}` },
-		// 	{ label: "View on Steam", url: `https://store.steampowered.com/app/${gameData.appid}` },
-		// 	{ label: "View News", url: `https://store.steampowered.com/app/${gameData.appid}/news/` },
-		// 	{ label: "View Screenshots", url: `https://store.steampowered.com/app/${gameData.appid}/screenshots/` },
-		// 	{ label: "View Videos", url: `https://store.steampowered.com/app/${gameData.appid}/videos/` }
-		// ]);
+		renderer.registerCtxMenuHandler(gameCard, [
+			{ type: "link", label: "Play", url: `steam://rungameid/${gameData.appid}` },
+			{ type: "link", label: "View on Steam", url: `https://store.steampowered.com/app/${gameData.appid}` },
+			{ type: "link", label: "View News", url: `https://store.steampowered.com/app/${gameData.appid}/news/` },
+			{ type: "link", label: "View Screenshots", url: `https://store.steampowered.com/app/${gameData.appid}/screenshots/` },
+			{ type: "link", label: "View Videos", url: `https://store.steampowered.com/app/${gameData.appid}/videos/` }
+		]);
 
 		return gameCard;
 	}
@@ -258,12 +254,40 @@ import { renderer } from "./renderManager.js";
 
 		// clear games container
 		gamesContainer.innerHTML = "";
-		gamesList.forEach((game, rank) =>
-			gamesContainer.appendChild(createGameCard(game, rank, topIds))
-		);
+
+		const filterableGameElements = gamesList.map((game, rank) => {
+			const gameCard = createGameCard(game, rank, topIds);
+			gamesContainer.appendChild(gameCard);
+			return {
+				element: gameCard,
+				name: game.name.toLowerCase()
+			};
+		});
+
+		function registerSearchInput() {
+			const searchInpt = renderer.$("game-search");
+
+			const filterGames = () => {
+				const filterString = searchInpt.value.trim().toLowerCase();
+
+				filterableGameElements.forEach(({ element, name }) => {
+					const matches = !filterString || name.includes(filterString);
+					element.style.visibility = matches ? "visible" : "hidden";
+					element.style.display = matches ? "block" : "none";
+				});
+			};
+
+			searchInpt.addEventListener("input", filterGames);
+		}
+
+		registerSearchInput();
 	}
 
 	async function renderUserDetails() {
+		const userAvatar = renderer.$("account-avatar");
+		const userName = renderer.$("account-name");
+		const userId = renderer.$("account-id");
+
 		const { avatarmedium, personaname, steamid } = await network.fetchUserDetails(steamUserId, steamApiKey);
 
 		userAvatar.src = avatarmedium || "img/defaultuserimage.png";
@@ -277,6 +301,10 @@ import { renderer } from "./renderManager.js";
 
 	function renderAppSettings() {
 		const dynamicZettings = {
+			renderingSettings: {
+				type: "divider",
+				label: "Render Settings"
+			},
 			sortType: {
 				label: "Sort by",
 				value: "playtime",
@@ -307,21 +335,25 @@ import { renderer } from "./renderManager.js";
 				value: false,
 				type: "checkbox"
 			},
-			// steamId: {
-			// 	label: "Steam ID",
-			// 	value: steamUserId || null,
-			// 	type: "text"
-			// },
-			// steamApiKey: {
-			// 	label: "Steam API Key",
-			// 	value: steamApiKey || null,
-			// 	type: "text"
-			// },
+			loginDetailsArea: {
+				type: "divider",
+				label: "Login Details"
+			},
+			steamId: {
+				label: "Steam ID",
+				value: steamUserId,
+				type: "text"
+			},
+			steamApiKey: {
+				label: "Steam API Key",
+				value: steamApiKey,
+				type: "text"
+			}
 		};
 
-		const container = $("settings-container");
-		const saveSettingsBtn = $("save-settings");
-		const resetSettingsBtn = $("reset-settings");
+		const container = renderer.$("settings-container");
+		const saveSettingsBtn = renderer.$("save-settings");
+		const resetSettingsBtn = renderer.$("reset-settings");
 
 		// Load values
 		const savedSettings = storage.getAll();
@@ -333,32 +365,45 @@ import { renderer } from "./renderManager.js";
 		}
 
 		// Render settings inputs
-		Object.entries(dynamicZettings).forEach(([key, { label, value, type, options }]) => {
+		Object.entries(dynamicZettings).forEach(([key, { label, value, type: elementType, options }]) => {
 			const formGroup = document.createElement("div");
 			formGroup.className = "settings-modal-group";
 
-			const inputLabel = document.createElement("label");
-			inputLabel.setAttribute("for", key);
-			inputLabel.innerText = label;
-			formGroup.appendChild(inputLabel);
+			if (elementType !== "divider") {
+				const inputLabel = document.createElement("label");
+				inputLabel.setAttribute("for", key);
+				inputLabel.innerText = label;
+				formGroup.appendChild(inputLabel);
+			}
 
 			let settingsInput;
 
-			if (type === "select") {
-				settingsInput = document.createElement("select");
-				settingsInput.innerHTML = options.map(opt =>
-					`<option value="${opt.value}" ${opt.value === storage.get(key) ? "selected" : ""}>${opt.label}</option>`
-				).join("");
-			} else if (type === "checkbox") {
-				settingsInput = document.createElement("input");
-				settingsInput.type = "checkbox";
+			switch (elementType) {
+				case "select":
+					settingsInput = document.createElement("select");
+					settingsInput.innerHTML = options.map(opt =>
+						`<option value="${opt.value}" ${opt.value === storage.get(key) ? "selected" : ""}>${opt.label}</option>`
+					).join("");
+					break;
+				case "divider":
+					settingsInput = document.createElement("div");
+					settingsInput.innerHTML = label;
+					break;
+				case "checkbox":
+					settingsInput = document.createElement("input");
+					settingsInput.type = "checkbox";
 
-				if (storage.get(key) === true)
-					settingsInput.checked = true
-			} else {
-				settingsInput = document.createElement("input");
-				settingsInput.type = "text";
-				settingsInput.value = storage.get(key) ?? value;
+					if (storage.get(key) === true)
+						settingsInput.checked = true
+					break;
+				case "text":
+					settingsInput = document.createElement("input");
+					settingsInput.type = "text";
+					settingsInput.value = storage.get(key) ?? value;
+					break;
+				default:
+					settingsInput = document.createElement("a");
+					break;
 			}
 
 			settingsInput.id = key;
@@ -372,7 +417,10 @@ import { renderer } from "./renderManager.js";
 				formGroup.appendChild(settingsInput);
 			}
 
-			formGroup.dataset.key = key;
+			if (elementType) {
+				settingsInput.classList.add("settings-" + elementType)
+			}
+
 			container.appendChild(formGroup);
 		});
 
@@ -431,7 +479,6 @@ import { renderer } from "./renderManager.js";
 		// Open settings
 		openSettingsBtn.addEventListener("click", () => settingsModal.removeAttribute("hidden"));
 	}
-
 	// #endregion UI Functions
 
 	// #region INIT
@@ -450,10 +497,10 @@ import { renderer } from "./renderManager.js";
 			sortAndRankThenRenderGames(games);
 			renderUserDetails();
 		} catch (e) {
-			// if (/missing|invalid/i.test(e.message))
-			// 	clearDataLogout("Invalid Steam ID or API Key. Please log in again.")
-			// else
-			// 	showError("Load error: " + e.message);
+			if (/missing|invalid/i.test(e.message))
+				showError("Invalid Steam ID or API Key. Please refresh the page or log in again.")
+			else
+				showError("Load error: " + e.message);
 		} finally {
 			hideLoading();
 		}

@@ -12,6 +12,12 @@ body {
     box-sizing: border-box;
 }
 
+div:focus,
+a:focus,
+span:focus {
+    outline: none;
+}
+
 input[type="range"] {
     width: 100%;
     accent-color: #66c0f4;
@@ -157,49 +163,57 @@ img {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid #fff;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     gap: 0.75rem;
+    border-bottom: 2px solid #2a475e;
+    padding: 10px 20px;
+    background-color: #171a21;
 }
 
-.user-info {
+.controls-topbar #game-search {
+    max-width: 250px;
+    width: 100%;
+    padding: 6px 10px;
+    background: #2a475e;
+    border: none;
+    color: #fff;
+    border-radius: 2px;
+}
+
+.account-details {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex: 1 1 auto;
     min-width: 0;
 }
 
-#user-avatar {
-    width: 36px;
-    height: 36px;
-    object-fit: cover;
-    border-radius: 10%;
-    flex-shrink: 0;
-}
-
-.user-details {
+.account-specifics {
     display: flex;
     flex-direction: column;
-    min-width: 0;
 }
 
-#user-name,
-#user-id {
-    user-select: text;
+#account-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: #2a475e;
+}
+
+#account-name,
+#account-id {
+    user-select: all;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-#user-name {
+#account-name {
     font-weight: 600;
     font-size: 1rem;
     color: #ffffff;
 }
 
-#user-id {
+#account-id {
     font-size: 0.85rem;
     color: #aaa;
 }
@@ -223,15 +237,10 @@ img {
 @media (max-width: 600px) {
     .controls-topbar {
         flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .user-info {
-        width: 100%;
+        align-items: center;
     }
 
     .user-actions {
-        width: 100%;
         justify-content: center;
     }
 
@@ -248,7 +257,7 @@ img {
 /**
     Game Cards
 */
-#games {
+#library {
     display: grid;
     width: 100%;
     height: 100%;
@@ -332,7 +341,7 @@ img {
 }
 
 @media (max-width:768px) {
-    #games {
+    #library {
         grid-template-columns: repeat(auto-fill, 140px);
         grid-auto-rows: 210px;
         gap: 16px 8px
@@ -340,7 +349,7 @@ img {
 }
 
 @media (max-width:480px) {
-    #games {
+    #library {
         grid-template-columns: repeat(auto-fill, 100px);
         grid-auto-rows: 150px;
         gap: 12px 6px
@@ -591,6 +600,8 @@ img {
     border-radius: 3px;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
     z-index: 1001;
+    overflow-y: auto;
+    max-height: 90vh;
 }
 
 .settings-modal-close {
@@ -617,14 +628,13 @@ img {
 }
 
 .settings-modal-content h2 {
-    margin: 0 0 28px;
+    margin: 0 0 15px;
     font-size: 20px;
     padding-bottom: 8px;
-    border-bottom: 1px solid #2a475e;
 }
 
 .settings-modal-group {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     display: flex;
     flex-direction: column;
     text-align: left;
@@ -635,6 +645,36 @@ img {
     align-items: center;
     flex-direction: row;
     gap: 26px;
+}
+
+.settings-modal-group .settings-divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: #ccc;
+    font-size: 14px;
+}
+
+.settings-divider::before,
+.settings-divider::after {
+    content: "";
+    width: 100%;
+    height: 1px;
+    margin: 12px;
+    background: #2a475e;
+    border: none;
+    opacity: 0.8;
+    flex: 1;
+    margin: 0 12px;
+}
+
+.settings-modal-group .settings-text {
+    width: 100%;
+    padding: 6px 10px;
+    background: #2a475e;
+    border: none;
+    color: #fff;
+    border-radius: 2px;
 }
 
 /**
@@ -655,30 +695,39 @@ img {
 }
 
 .context-menu {
+    box-shadow: 0 10px 32px 0px #000000ab;
+    background: #3d4450;
+    -webkit-app-region: no-drag;
+    overflow-y: auto;
+    opacity: 1;
+    transition: opacity 200ms;
+    z-index: 1600;
+    user-select: none;
+    padding: 4px;
     position: absolute;
-    z-index: 10000;
-    background: #222;
-    border: 1px solid #444;
-    border-radius: 4px;
-    padding: 4px 0;
-    min-width: 180px;
-    color: #eee;
+    display: flex;
+    flex-direction: column;
     font-size: 14px;
-    user-select: none
 }
 
 .context-menu-item {
-    padding: 6px 16px;
+    padding: 8px 18px;
+    font-size: 13px;
+    color: #dcdedf;
     cursor: pointer;
-    white-space: nowrap;
+    position: relative;
+    min-width: fit-content;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    border-top: none;
+    border-bottom: none;
+    line-height: 17px;
 }
 
 .context-menu-item:hover {
-    background-color: #444;
-}
-
-.context-menu-item:active {
-    background-color: #666;
+    background-color: #dcdedf;
+    color: #3d4450;
 }
 
 /**

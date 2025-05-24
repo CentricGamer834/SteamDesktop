@@ -1,15 +1,15 @@
 import { storage } from "./storageManager.js";
 import { network } from "./networkManager.js";
-import $ from "./renderManager.js";
+import { renderer } from "./renderManager.js";
 
 (() => {
-	const loginForm = $("login-form"),
-		steamIdInput = $("accountId"),
-		apiKeyInput = $("apiKey"),
-		errorDisplay = $("error-display"),
-		autoFillCheckbox = $("auto-fill"),
-		autoLoginCheckbox = $("auto-login"),
-		submitButton = $("submit");
+	const loginForm = renderer.$("login-form"),
+		steamIdInput = renderer.$("accountId"),
+		apiKeyInput = renderer.$("apiKey"),
+		errorDisplay = renderer.$("error-display"),
+		autoFillCheckbox = renderer.$("auto-fill"),
+		autoLoginCheckbox = renderer.$("auto-login"),
+		submitButton = renderer.$("submit");
 
 	const isValidSteamId = (id) => /^[0-9]{17}$/.test(id);
 	const isValidApiKey = (key) => /^[A-F0-9]{32}$/i.test(key);
